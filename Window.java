@@ -15,7 +15,7 @@ public class Window extends JPanel implements KeyListener, MouseMotionListener, 
         Game.height = height;
 
         //Replace with Class which implements GameLogic.  Essentially the "game" 
-        game = new CircleEater();
+        game = new FlappyBird();
     }
 
     @Override

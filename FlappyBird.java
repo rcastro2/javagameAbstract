@@ -4,8 +4,9 @@ public class FlappyBird implements GameLogic{
     Color c;
     Sprite bk,pipeTop,pipeBottom;
     Sprite logo, gameover;
-    Animation bar, bird, ring;
+    Animation bar, bird, ring, ring2;
     Sound wing, point, hit;
+    int score = 0, intialSpeed = 2, speed = intialSpeed ;
 
     String state;
     public FlappyBird() {
@@ -20,8 +21,14 @@ public class FlappyBird implements GameLogic{
         bird.x = 300;
 
         ring = new Animation("images/ring2.png",64,64,64,2);
+        ring2 = new Animation("images/ring2.png",64,64,64,2);
+        ring2.y = Game.height - 70;
+        ring2.x = 30;
+        ring2.resizeBy(-25);
 
-        logo = new Sprite("images/logo.png",(int)(Game.width/2),100);
+        logo = new Sprite("images/logo.png",(int)(Game.width/2),100);        
+        logo.x = Game.width/2;
+
         gameover = new Sprite("images/flappybird_end.png",(int)(Game.width/2),100);
 
         wing = new Sound("sounds/wing.wav");
@@ -61,26 +68,30 @@ public class FlappyBird implements GameLogic{
             ring.visible = true;
             pipeTop.y = ring.y - 200;
             pipeBottom.y = ring.y + 200;
+            speed = intialSpeed;
+            score = 0;
         }
     }
 
     public void mainScreen(){
-        Game.scrollBackground("left",2);
+        Game.scrollBackground("left",speed);
         
         bird.draw();
         ring.draw();
         pipeTop.draw();
         pipeBottom.draw();
         bar.draw();
+        ring2.draw();
+        Game.drawText(" x " + score,50,Game.height - 20, new Font("Comic Sans MS", 36, Color.RED, Color.BLACK));
         
         if(Keys.pressed[Keys.SPACE]){
-            bird.y -= 1;
+            bird.y -= speed/2;
             wing.play();
         }else{
-            bird.y += 1;
+            bird.y += speed/2;
         }
         pipeTop.x = ring.x;
-        ring.x -= 4;
+        ring.x -= speed;
         pipeBottom.x = ring.x;
 
         if(ring.x < -100){
@@ -92,6 +103,9 @@ public class FlappyBird implements GameLogic{
         }
         if(bird.collidedWith(ring,"circle")){
             ring.visible = false;
+            score++;
+            speed++;
+            System.out.println(speed);
             point.play();
         }
         if(bird.collidedWith(pipeTop,"rect") || bird.collidedWith(pipeBottom,"rect") || bird.collidedWith(bar,"rect")){
