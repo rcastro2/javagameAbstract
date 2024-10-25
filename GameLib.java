@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import javax.sound.sampled.*;
@@ -109,13 +110,13 @@ class Game{
         background = bkGraphics;
         for(int r = 0; r < 3; r++){
             for(int c = 0; c < 3; c++){
-              backgroundXY[r][c] = new Coordinate(background.width * (c-1) + background.width / 2,background.height * (r-1) + background.height / 2);
+              backgroundXY[r][c] = new Coordinate((int)(background.width * (c-1) + background.width / 2),(int)(background.height * (r-1) + background.height / 2));
             }
         }
     }
     public static void scrollBackground(String direction, int amt){
-        int width = background.width;
-        int height = background.height;
+        int width = (int)background.width;
+        int height = (int)background.height;
 
         if(direction.contains("left")){
             for(int r = 0; r < 3; r++){
@@ -166,16 +167,18 @@ class Game{
 
 abstract class GameObject{
     public int x, y;
-    public int width, height;
+    public double width, height;
     public int left,right,top,bottom;
     public boolean visible;
     public String borderType;
+    public double scale;
 
     public GameObject(){
         this.x = (int)(Game.width / 2);
         this.y = (int)(Game.height / 2);
         this.visible = true;
         this.borderType = null;
+        this.scale = 1;
     }
 
     public void moveTo(int x, int y){
@@ -193,7 +196,7 @@ abstract class GameObject{
                 double dx = this.x - obj.x;
                 double dy = this.y - obj.y;
                 double d = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
-                collision = d < (int)((this.width/2+this.height/2)/2) + (int)((obj.width/2+obj.height/2)/2);
+                collision = d < (int)((this.width/2*this.scale+this.height/2*this.scale)/2) + (int)((obj.width/2*obj.scale+obj.height/2*obj.scale)/2);
             }else if(shape.equals("rect")){
                 collision = !(obj.left > this.right || obj.right < this.left || obj.top > this.bottom || obj.bottom < this.top);
             }
@@ -204,14 +207,14 @@ abstract class GameObject{
     protected void drawBoundaries(){
         if(borderType != null && borderType.equals("circle")){
             Game.canvas.fillOval(this.x,this.y,5,5);
-            Game.canvas.drawOval((int)(this.x - this.width/2),(int)(this.y - this.height/2),this.width,this.height);
+            Game.canvas.drawOval((int)(this.x - this.width/2*this.scale),(int)(this.y - this.height/2*this.scale),(int)(this.width*this.scale),(int)(this.height*this.scale));
         }else if (borderType != null && borderType.equals("rect")){
-            Game.canvas.drawRect((int)(this.x - this.width/2),(int)(this.y - this.height/2),this.width,this.height);
+            Game.canvas.drawRect((int)(this.x - this.width/2*this.scale),(int)(this.y - this.height/2*this.scale),(int)(this.width*this.scale),(int)(this.height*this.scale));
         }
     }
     public void updateRect(){
-        int width = this.width;
-        int height = this.height;
+        int width = (int)(this.width*this.scale);
+        int height = (int)(this.height*this.scale);
   
         this.left = this.x - width/2;
         this.top = this.y - height/2;
@@ -222,12 +225,14 @@ abstract class GameObject{
 
 class Sprite extends GameObject{
     protected Image i;
+    protected Image original;
 
     public Sprite(String fn) {
         URL url = getClass().getClassLoader().getResource(fn);
         //System.out.println(url);
         if (url != null) {
           this.i = new ImageIcon(url).getImage();
+          this.original = new ImageIcon(url).getImage();
           this.width = this.i.getWidth(null);
           this.height = this.i.getHeight(null);
         } else {
@@ -241,6 +246,7 @@ class Sprite extends GameObject{
         URL url = getClass().getClassLoader().getResource(fn);
         if (url != null) {
           this.i = new ImageIcon(url).getImage();
+          this.original = new ImageIcon(url).getImage();
           this.width = this.i.getWidth(null);
           this.height = this.i.getHeight(null);
         } else {
@@ -257,14 +263,21 @@ class Sprite extends GameObject{
     }
 
     public void resizeTo(int w, int h){
-        this.i = this.i.getScaledInstance(w, h,  java.awt.Image.SCALE_SMOOTH);
+        Image image = this.original.getScaledInstance(w, h,  java.awt.Image.SCALE_SMOOTH);
+        this.i = new ImageIcon(image).getImage();
+    }
+    public void resizeBy(double by){
+        double pct = 1 + by / 100;
+        this.width *= pct;
+        this.height *= pct;
+        this.resizeTo((int)this.width, (int)this.height);
     }
 
 }
 
 class Animation extends Sprite{
-    public int frame_width,frame_height, current_frame, frames, frame_per_rows, frame_per_cols;
-    private double frame_rate, frame_count;
+    public int current_frame, frames, frame_per_rows, frame_per_cols;
+    private double frame_width,frame_height, frame_rate, frame_count;
 
     public Animation(String fn, int frames, int frame_width, int frame_height, double frame_rate) {
         super(fn);
@@ -279,12 +292,15 @@ class Animation extends Sprite{
         this.width = frame_width;
         this.height = frame_height;
     }
+    public void resizeBy(double by){
+        this.scale += by / 100;
+    }
 
     public void draw(){
-        int sourceStartX = (this.current_frame % this.frame_per_cols) * this.frame_width;
-        int sourceStartY = (this.current_frame / this.frame_per_cols) * this.frame_height;
+        int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
+        int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;
         if(this.visible){           
-            Game.canvas.drawImage(i,(int)(this.x - this.frame_width/2 ),(int)(this.y - this.frame_height/2 ),this.x + this.frame_width/2, this.y + this.frame_height/2, sourceStartX, sourceStartY, sourceStartX + this.frame_width, sourceStartY + this.frame_height,null);
+            Game.canvas.drawImage(i,(int)(this.x - this.frame_width/2 * this.scale ),(int)(this.y - this.frame_height/2 *this.scale),(int)(this.x + this.frame_width/2 * this.scale),(int)(this.y + this.frame_height/2 * this.scale), sourceStartX, sourceStartY, sourceStartX + (int)this.frame_width, sourceStartY + (int)this.frame_height,null);
         }
 
         this.frame_count += this.frame_rate;
@@ -316,7 +332,7 @@ class Shape extends GameObject{
         Game.canvas.setPaint(this.color);
         if(this.visible){
             if(shape.equals("ellipse")){
-                Game.canvas.fillOval(this.x - this.width/2,this.y - this.height/2,this.width,this.height);
+                Game.canvas.fillOval((int)(this.x - this.width/2),(int)(this.y - this.height/2),(int)this.width,(int)this.height);
             }
         }
     }
