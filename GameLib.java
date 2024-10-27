@@ -164,6 +164,9 @@ class Game{
                 background.moveTo(backgroundXY[r][c].x,backgroundXY[r][c].y);
             }           
     }
+    public static void exit(){
+        App.frame.dispose();
+    }
 }
 
 abstract class GameObject{

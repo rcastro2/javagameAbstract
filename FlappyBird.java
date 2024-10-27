@@ -95,7 +95,7 @@ public class FlappyBird implements GameLogic{
             wing.play();
         }else{
             if(bird.angle < 30){
-                bird.angle += speed;
+                bird.angle += speed * 2;
             }
             bird.y += speed/2;
         }
@@ -125,10 +125,15 @@ public class FlappyBird implements GameLogic{
     public void gameOverScreen(){
         Game.scrollBackground("left",2);
         gameover.draw();
-        Game.drawText("Press [Y] to play again",200,300, new Font("Comic Sans MS", 24, Color.WHITE, Color.BLACK));
+        Game.drawText("Press [Y/N] to play again or quit",150,300, new Font("Comic Sans MS", 24, Color.WHITE, Color.BLACK));
         bar.draw();
+        ring2.draw();
+        Game.drawText(" x " + score,50,Game.height - 20, new Font("Comic Sans MS", 36, Color.RED, Color.BLACK));
+        
         if(Keys.pressed[Keys.Y]){
             state = "start";
+        }else if(Keys.pressed[Keys.N]){
+            Game.exit();
         }
     }
 }

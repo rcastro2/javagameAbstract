@@ -1,14 +1,15 @@
 import javax.swing.*;
 
 public class App {
+      public static JFrame frame;
       public static void main(String[] args) {
-        JFrame f = new JFrame();
+        frame = new JFrame();
         Window c = new Window(700,512);
-        f.add(c);
-        f.setTitle(c.game.getTitle());
-        f.setSize(Game.width, Game.height);
-        f.setVisible(true);
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(c);
+        frame.setTitle(c.game.getTitle());
+        frame.setSize(Game.width, Game.height);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }
 
