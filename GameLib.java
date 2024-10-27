@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.net.URL;
 import javax.sound.sampled.*;
@@ -171,7 +172,7 @@ abstract class GameObject{
     public int left,right,top,bottom;
     public boolean visible;
     public String borderType;
-    public double scale;
+    public double scale, angle;
 
     public GameObject(){
         this.x = (int)(Game.width / 2);
@@ -256,7 +257,26 @@ class Sprite extends GameObject{
 
     public void draw(){
         if(this.visible){
-            Game.canvas.drawImage(i,(int)(this.x - this.width/2),(int)(this.y - this.height/2),null);
+            AffineTransform oldTransform = Game.canvas.getTransform();
+
+            // Translate to the object's position
+            Game.canvas.translate(this.x, this.y);
+            // Rotate around the center of the image
+            Game.canvas.rotate(Math.toRadians(this.angle));
+
+            // Draw the image centered at (0, 0)
+            Game.canvas.drawImage(i,
+                (int)(-this.width / 2 * this.scale), 
+                (int)(-this.height / 2 * this.scale), 
+                (int)(this.width / 2 * this.scale), 
+                (int)(this.height / 2 * this.scale), 
+                0, 0, 
+                (int)this.width, 
+                (int)this.height, 
+                null);
+
+            // Restore the previous transformation
+            Game.canvas.setTransform(oldTransform);
         }
         updateRect();
         drawBoundaries();
@@ -272,7 +292,6 @@ class Sprite extends GameObject{
         this.height *= pct;
         this.resizeTo((int)this.width, (int)this.height);
     }
-
 }
 
 class Animation extends Sprite{
@@ -299,8 +318,28 @@ class Animation extends Sprite{
     public void draw(){
         int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
         int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;
-        if(this.visible){           
-            Game.canvas.drawImage(i,(int)(this.x - this.frame_width/2 * this.scale ),(int)(this.y - this.frame_height/2 *this.scale),(int)(this.x + this.frame_width/2 * this.scale),(int)(this.y + this.frame_height/2 * this.scale), sourceStartX, sourceStartY, sourceStartX + (int)this.frame_width, sourceStartY + (int)this.frame_height,null);
+        if(this.visible){               
+            // Save the current transformation
+            AffineTransform oldTransform = Game.canvas.getTransform();
+
+            // Translate to the object's position
+            Game.canvas.translate(this.x, this.y);
+            // Rotate around the center of the image
+            Game.canvas.rotate(Math.toRadians(this.angle));
+
+            // Draw the image centered at (0, 0)
+            Game.canvas.drawImage(i,
+                (int)(-this.frame_width / 2 * this.scale), 
+                (int)(-this.frame_height / 2 * this.scale), 
+                (int)(this.frame_width / 2 * this.scale), 
+                (int)(this.frame_height / 2 * this.scale), 
+                sourceStartX, sourceStartY, 
+                sourceStartX + (int)this.frame_width, 
+                sourceStartY + (int)this.frame_height, 
+                null);
+
+            // Restore the previous transformation
+            Game.canvas.setTransform(oldTransform);       
         }
 
         this.frame_count += this.frame_rate;
