@@ -57,7 +57,7 @@ public class CircleEater implements GameLogic{
         }
         s.draw();
         String loc = String.format("(%d, %d)",you.x, you.y);
-        Game.drawText(loc,s.x - 20,s.y + 10 + s.height);
+        Game.drawText(loc,s.x - 20,s.y + 10 + (int)s.height);
     }
 
     public void print(Object obj){
