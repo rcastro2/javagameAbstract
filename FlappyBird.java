@@ -1,12 +1,11 @@
 import java.awt.*;
 
 public class FlappyBird implements GameLogic{
-    Color c;
     Sprite bk,pipeTop,pipeBottom;
     Sprite logo, gameover;
     Animation bar, bird, ring, ring2;
     Sound wing, point, hit;
-    int score = 0, intialSpeed = 2, speed = intialSpeed ;
+    int score = 0, intialSpeed = 2, speed = intialSpeed;
 
     String state;
     public FlappyBird() {
@@ -85,9 +84,15 @@ public class FlappyBird implements GameLogic{
         Game.drawText(" x " + score,50,Game.height - 20, new Font("Comic Sans MS", 36, Color.RED, Color.BLACK));
         
         if(Keys.pressed[Keys.SPACE]){
+            if(bird.angle > -30){
+                bird.angle -= speed * 2;
+            }
             bird.y -= speed/2;
             wing.play();
         }else{
+            if(bird.angle < 30){
+                bird.angle += speed;
+            }
             bird.y += speed/2;
         }
         pipeTop.x = ring.x;
@@ -105,7 +110,6 @@ public class FlappyBird implements GameLogic{
             ring.visible = false;
             score++;
             speed++;
-            System.out.println(speed);
             point.play();
         }
         if(bird.collidedWith(pipeTop,"rect") || bird.collidedWith(pipeBottom,"rect") || bird.collidedWith(bar,"rect")){
