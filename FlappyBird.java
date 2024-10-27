@@ -36,6 +36,10 @@ public class FlappyBird implements GameLogic{
 
         state = "start";
     }
+    public String getTitle(){
+        //Use in App.java to set the title of the JFrame
+        return "FlappyBird";
+    }
     public void gameLoop(){
         switch(state){
             case "start":

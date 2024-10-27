@@ -20,6 +20,10 @@ public class CircleEater implements GameLogic{
             targets.add(new Coordinate(x,y));
         }
     }
+    public String getTitle(){
+        //Use in App.java to set the title of the JFrame
+        return "Circle Eater";
+    }
     public void gameLoop(){
         String direction = "";
         if(Keys.pressed[Keys.UP]){

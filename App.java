@@ -5,6 +5,7 @@ public class App {
         JFrame f = new JFrame();
         Window c = new Window(700,512);
         f.add(c);
+        f.setTitle(c.game.getTitle());
         f.setSize(Game.width, Game.height);
         f.setVisible(true);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

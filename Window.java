@@ -4,7 +4,7 @@ import java.awt.event.*;
 
 public class Window extends JPanel implements KeyListener, MouseMotionListener, MouseListener {
 
-    GameLogic game;
+    public GameLogic game;
 
     public Window(int width, int height) {
         addKeyListener(this);
