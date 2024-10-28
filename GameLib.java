@@ -115,6 +115,11 @@ class Game{
             }
         }
     }
+    public static void drawBackground(){
+        if(background != null){
+            background.draw();
+        }
+    }
     public static void scrollBackground(String direction, int amt){
         int width = (int)background.width;
         int height = (int)background.height;
@@ -174,8 +179,8 @@ abstract class GameObject{
     public double width, height;
     public int left,right,top,bottom;
     public boolean visible;
-    public String borderType;
-    public double scale, angle;
+    public String borderType, rotate;
+    public double scale, rotateAngle;
 
     public GameObject(){
         this.x = (int)(Game.width / 2);
@@ -183,6 +188,7 @@ abstract class GameObject{
         this.visible = true;
         this.borderType = null;
         this.scale = 1;
+        this.rotateAngle = 0;
     }
 
     public void moveTo(int x, int y){
@@ -191,6 +197,15 @@ abstract class GameObject{
         draw();
     }
 
+    public void rotateBy(double angle, String direction){
+        double rad = Math.toRadians(angle);
+        this.rotate = direction;
+        if(direction.equals("left")){
+            rad = -rad;
+        }
+        this.rotateAngle += rad;
+    }
+        
     abstract public void draw();
     
     public boolean collidedWith(GameObject obj, String shape){
@@ -265,7 +280,7 @@ class Sprite extends GameObject{
             // Translate to the object's position
             Game.canvas.translate(this.x, this.y);
             // Rotate around the center of the image
-            Game.canvas.rotate(Math.toRadians(this.angle));
+            Game.canvas.rotate(this.rotateAngle);
 
             // Draw the image centered at (0, 0)
             Game.canvas.drawImage(i,
@@ -328,7 +343,7 @@ class Animation extends Sprite{
             // Translate to the object's position
             Game.canvas.translate(this.x, this.y);
             // Rotate around the center of the image
-            Game.canvas.rotate(Math.toRadians(this.angle));
+            Game.canvas.rotate(this.rotateAngle);
 
             // Draw the image centered at (0, 0)
             Game.canvas.drawImage(i,

@@ -88,14 +88,14 @@ public class FlappyBird implements GameLogic{
         Game.drawText(" x " + score,50,Game.height - 20, new Font("Comic Sans MS", 36, Color.RED, Color.BLACK));
         
         if(Keys.pressed[Keys.SPACE]){
-            if(bird.angle > -30){
-                bird.angle -= speed * 2;
+            if(bird.rotateAngle > -30){
+                bird.rotateAngle -= speed * 2;
             }
             bird.y -= speed/2;
             wing.play();
         }else{
-            if(bird.angle < 30){
-                bird.angle += speed * 2;
+            if(bird.rotateAngle < 30){
+                bird.rotateAngle += speed * 2;
             }
             bird.y += speed/2;
         }
