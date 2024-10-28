@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class Asteroids implements GameLogic{
     Sprite bk,ship;
+    Animation asteroid;
     
     ArrayList<Coordinate> targets = new ArrayList<Coordinate>();
     int speed = 2;
@@ -10,7 +11,9 @@ public class Asteroids implements GameLogic{
 
     public Asteroids() {
         bk = new Animation("images/field_5.png",5,1000,1000,1);
+        asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1);
         ship = new Sprite("images/hero.gif");
+        asteroid.setSpeed(4, 60);
         Game.setBackground(bk);
 
     }
@@ -21,6 +24,7 @@ public class Asteroids implements GameLogic{
     public void gameLoop(){
         Game.drawBackground();
         ship.draw();
+        asteroid.move(true);
 
         if(Keys.pressed[Keys.LEFT]){
             ship.rotateBy(2,"left"); 

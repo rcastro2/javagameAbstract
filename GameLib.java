@@ -176,11 +176,12 @@ class Game{
 
 abstract class GameObject{
     public int x, y;
+    public double dx, dy, dxsign, dysign;
     public double width, height;
     public int left,right,top,bottom;
     public boolean visible;
     public String borderType, rotate;
-    public double scale, rotateAngle;
+    public double scale, rotateAngle, speed, moveAngle;
 
     public GameObject(){
         this.x = (int)(Game.width / 2);
@@ -189,12 +190,40 @@ abstract class GameObject{
         this.borderType = null;
         this.scale = 1;
         this.rotateAngle = 0;
+        this.dxsign = 1;
+        this.dysign = 1;
+    }
+
+    public void setSpeed(double speed, double angle){
+        this.speed = speed;
+        this.moveAngle = Math.toRadians(angle);
+        this.calculateSpeedDeltas();
+        
+    }
+    public void move(boolean bounce){
+        if(bounce){
+            if(this.left - this.dx < 0 || this.right + this.dx > Game.width){
+                this.dxsign = -this.dxsign;
+            }
+            if(this.top - this.dy < 0 || this.bottom + this.dy > Game.height ){
+                this.dysign = -this.dysign;
+            }
+        }
+        this.calculateSpeedDeltas();
+        this.x += this.dx * this.dxsign;
+        this.y += this.dy * this.dysign;
+        this.draw();
+    }
+
+    public void calculateSpeedDeltas(){
+        this.dx = this.speed * Math.sin(this.moveAngle - Math.PI);
+        this.dy = this.speed * Math.cos(this.moveAngle - Math.PI);
     }
 
     public void moveTo(int x, int y){
         this.x = x;
         this.y = y;
-        draw();
+        this.draw();
     }
 
     public void rotateBy(double angle, String direction){
