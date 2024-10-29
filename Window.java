@@ -1,12 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class Window extends JPanel implements KeyListener, MouseMotionListener, MouseListener {
 
     public GameLogic game;
 
-    public Window(int width, int height) {
+    public Window(int width, int height, String className) {
         addKeyListener(this);
         addMouseMotionListener(this);
         addMouseListener(this);
@@ -14,8 +15,18 @@ public class Window extends JPanel implements KeyListener, MouseMotionListener, 
         Game.width = width;
         Game.height = height;
 
-        //Replace with Class which implements GameLogic.  Essentially the "game" 
-        game = new Asteroids();
+        try{
+            //Use reflection to instantiate a class based on a string 
+            Class<?> gameClass = Class.forName(className);
+            Object gameInstance = gameClass.getDeclaredConstructor().newInstance();
+            game = (GameLogic)gameInstance;
+
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class not found: " + e.getMessage());
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            System.out.println("Error creating instance: " + e.getMessage());
+        }
+        
     }
 
     @Override
