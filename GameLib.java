@@ -427,8 +427,6 @@ class Animation extends Sprite{
             
         }
 
-
-
         updateRect();
         drawBoundaries();     
     }
@@ -441,13 +439,51 @@ class Shape extends GameObject{
     public String shape;
     public int side, size;
     public Color color;
+    public int XPoints[], YPoints[];
+    public double reference_angle, angle_offset, reference_angles[]; 
 
     public Shape(String shape,int arg1,int arg2,Color color){
         this.shape = shape;
+        this.color = color;
         if(shape.equals("ellipse")){
             this.width = arg1;
             this.height = arg2;
-            this.color = color;
+        }else if(shape.equals("polygon")){
+            this.side = arg1;
+            this.size = arg2;
+            this.width = this.size * 2;
+            this.height = this.size * 2;
+            this.reference_angle = 2 * Math.PI / this.side;
+            this.angle_offset = Math.PI / this.side;
+            this.XPoints = new int[this.size];
+            this.YPoints = new int[this.size];
+            this.updatePoints();
+        }else if(shape.equals("rectangle")){
+            this.side = 4;
+            this.width = arg1;
+            this.height = arg2;
+            this.size = (int)(Math.sqrt(Math.pow(this.width,2) + Math.pow(this.height,2) / 2));
+            double angle1 = Math.PI - 2*Math.atan(this.width/this.height);
+            double angle2 = Math.PI - 2*Math.atan(this.height/this.width);
+            double tmp[] = {angle1/2,angle2,angle1,angle2};
+            this.reference_angles =  tmp;
+            this.XPoints = new int[4];
+            this.YPoints = new int[4];
+        }
+    }
+    public void updatePoints(){
+        double x = 0, y = 0, theta = 0;
+        for(int index = 0; index < this.side; index++){
+            if(this.shape.equals("polygon")){
+                x = this.x + this.size * Math.cos(this.rotateAngle + this.reference_angle * index + this.angle_offset);
+                y = this.y + this.size * Math.sin(this.rotateAngle + this.reference_angle * index + this.angle_offset);
+            }else if(this.shape.equals("rectangle")){
+                theta += this.reference_angles[index];
+                  x = this.x + this.size * Math.cos(this.rotateAngle + theta);
+                  y = this.y + this.size * Math.sin(this.rotateAngle + theta);
+            }
+            this.XPoints[index] = (int)x;
+            this.YPoints[index] = (int)y;
         }
     }
     public void draw(){
@@ -455,6 +491,9 @@ class Shape extends GameObject{
         if(this.visible){
             if(shape.equals("ellipse")){
                 Game.canvas.fillOval((int)(this.x - this.width/2),(int)(this.y - this.height/2),(int)this.width,(int)this.height);
+            }else if(this.shape.equals("polygon") || this.shape.equals("rectangle")){
+                this.updatePoints();
+                Game.canvas.fillPolygon(this.XPoints,this.YPoints,this.side);
             }
         }
     }
