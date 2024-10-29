@@ -193,6 +193,11 @@ abstract class GameObject{
         this.dxsign = 1;
         this.dysign = 1;
     }
+    public void moveTo(int x, int y){
+        this.x = x;
+        this.y = y;
+        this.draw();
+    }
 
     public void setSpeed(double speed, double angle){
         this.speed = speed;
@@ -214,16 +219,13 @@ abstract class GameObject{
         this.y += this.dy * this.dysign;
         this.draw();
     }
-
-    public void calculateSpeedDeltas(){
-        this.dx = this.speed * Math.sin(this.moveAngle - Math.PI);
-        this.dy = this.speed * Math.cos(this.moveAngle - Math.PI);
+    public void move(){
+        this.move(false);
     }
 
-    public void moveTo(int x, int y){
-        this.x = x;
-        this.y = y;
-        this.draw();
+    public void calculateSpeedDeltas(){
+        this.dx = this.speed * Math.cos(this.moveAngle );
+        this.dy = this.speed * Math.sin(this.moveAngle );
     }
 
     public void rotateBy(double angle, String direction){
@@ -232,7 +234,8 @@ abstract class GameObject{
         if(direction.equals("left")){
             rad = -rad;
         }
-        this.rotateAngle += rad;
+        this.rotateAngle = (this.rotateAngle + rad ) % (2 * Math.PI) ;
+        this.moveAngle = (this.moveAngle + rad) % (2 * Math.PI);
     }
         
     abstract public void draw();
@@ -309,7 +312,7 @@ class Sprite extends GameObject{
             // Translate to the object's position
             Game.canvas.translate(this.x, this.y);
             // Rotate around the center of the image
-            Game.canvas.rotate(this.rotateAngle);
+            Game.canvas.rotate(this.rotateAngle + Math.PI / 2);
 
             // Draw the image centered at (0, 0)
             Game.canvas.drawImage(i,
