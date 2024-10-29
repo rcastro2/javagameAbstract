@@ -169,6 +169,9 @@ class Game{
                 background.moveTo(backgroundXY[r][c].x,backgroundXY[r][c].y);
             }           
     }
+    public static int rnd(double l,double u){
+        return (int)(Math.random()*(u-l)+l);
+    }
     public static void exit(){
         App.frame.dispose();
     }
@@ -242,7 +245,7 @@ abstract class GameObject{
     
     public boolean collidedWith(GameObject obj, String shape){
         boolean collision = false;
-        if(obj.visible){
+        if(obj.visible && this.visible){
             if(shape.equals("circle")){
                 double dx = this.x - obj.x;
                 double dy = this.y - obj.y;
@@ -263,6 +266,25 @@ abstract class GameObject{
             Game.canvas.drawRect((int)(this.x - this.width/2*this.scale),(int)(this.y - this.height/2*this.scale),(int)(this.width*this.scale),(int)(this.height*this.scale));
         }
     }
+
+    public boolean isOffScreen(String side){
+        boolean offscreen = false;
+        if(side=="all")
+                offscreen = this.right < 0 || this.left > Game.width || this.top > Game.height || this.bottom < 0;
+        else if(side == "bottom")
+                offscreen = this.top > Game.height;
+        else if(side == "top")
+                offscreen = this.bottom < 0;
+        else if(side == "left")
+                offscreen = this.right < 0;
+        else if(side == "right")
+                offscreen = this.left > Game.width;	
+        return offscreen;
+    }
+    public boolean isOffScreen(){
+        return this.isOffScreen("all");
+    }
+
     public void updateRect(){
         int width = (int)(this.width*this.scale);
         int height = (int)(this.height*this.scale);
@@ -347,6 +369,7 @@ class Sprite extends GameObject{
 class Animation extends Sprite{
     public int current_frame, frames, frame_per_rows, frame_per_cols;
     private double frame_width,frame_height, frame_rate, frame_count;
+    public boolean loop;
 
     public Animation(String fn, int frames, int frame_width, int frame_height, double frame_rate) {
         super(fn);
@@ -365,10 +388,10 @@ class Animation extends Sprite{
         this.scale += by / 100;
     }
 
-    public void draw(){
-        int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
-        int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;
-        if(this.visible){               
+    public void draw(boolean loop){      
+        if(this.visible){  
+            int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
+            int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;             
             // Save the current transformation
             AffineTransform oldTransform = Game.canvas.getTransform();
 
@@ -389,18 +412,28 @@ class Animation extends Sprite{
                 null);
 
             // Restore the previous transformation
-            Game.canvas.setTransform(oldTransform);       
+            Game.canvas.setTransform(oldTransform);    
+            this.frame_count += this.frame_rate;
+            if(this.frame_count > 1){
+                this.frame_count = 0;
+                this.current_frame++;
+            }
+            this.current_frame = this.current_frame % this.frames;
+            
+            if(!loop && this.current_frame == this.frame_count){
+                this.visible = false;
+                this.current_frame = 0;
+            }
+            
         }
 
-        this.frame_count += this.frame_rate;
-        if(this.frame_count > 1){
-            this.frame_count = 0;
-            this.current_frame++;
-        }
-        this.current_frame = this.current_frame % this.frames;
+
 
         updateRect();
         drawBoundaries();     
+    }
+    public void draw(){
+        this.draw(true);
     }
 }
 
