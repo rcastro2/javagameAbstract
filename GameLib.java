@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+
 import javax.sound.sampled.*;
 
 class Keys {
@@ -87,6 +89,7 @@ class Game{
     public static int height;
     public static Sprite background;
     public static Coordinate[][] backgroundXY = new Coordinate[3][3];
+    public static String state;
 
     public static void drawText(String msg, int x, int y){
         canvas.drawString(msg,x,y);
@@ -185,6 +188,7 @@ abstract class GameObject{
     public boolean visible;
     public String borderType, rotate;
     public double scale, rotateAngle, speed, moveAngle;
+    public HashMap<String,Object> properties;
 
     public GameObject(){
         this.x = (int)(Game.width / 2);
@@ -195,13 +199,19 @@ abstract class GameObject{
         this.rotateAngle = 0;
         this.dxsign = 1;
         this.dysign = 1;
+        properties = new HashMap<>();
     }
+    public void set(String key, Object value){
+        properties.put(key, value);
+    }
+    public Object get(String key){
+        return properties.get(key);
+    }
+
     public void moveTo(int x, int y){
         this.x = x;
         this.y = y;
-        if(Game.canvas != null){
-            this.draw();
-        }
+        this.draw();
     }
 
     public void setSpeed(double speed, double angle){
