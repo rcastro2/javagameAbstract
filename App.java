@@ -20,4 +20,3 @@ public class App {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }
-

@@ -20,13 +20,11 @@ public class Window extends JPanel implements KeyListener, MouseMotionListener, 
             Class<?> gameClass = Class.forName(className);
             Object gameInstance = gameClass.getDeclaredConstructor().newInstance();
             game = (GameLogic)gameInstance;
-
         } catch (ClassNotFoundException e) {
             System.out.println("Class not found: " + e.getMessage());
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             System.out.println("Error creating instance: " + e.getMessage());
         }
-        
     }
 
     @Override
