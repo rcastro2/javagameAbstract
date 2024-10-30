@@ -199,7 +199,9 @@ abstract class GameObject{
     public void moveTo(int x, int y){
         this.x = x;
         this.y = y;
-        this.draw();
+        if(Game.canvas != null){
+            this.draw();
+        }
     }
 
     public void setSpeed(double speed, double angle){
@@ -487,8 +489,10 @@ class Shape extends GameObject{
         }
     }
     public void draw(){
-        Game.canvas.setPaint(this.color);
+        
         if(this.visible){
+            Game.canvas.setPaint(this.color);
+            this.updatePoints();
             if(shape.equals("ellipse")){
                 Game.canvas.fillOval((int)(this.x - this.width/2),(int)(this.y - this.height/2),(int)this.width,(int)this.height);
             }else if(this.shape.equals("polygon") || this.shape.equals("rectangle")){
