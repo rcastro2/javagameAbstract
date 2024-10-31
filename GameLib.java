@@ -211,7 +211,9 @@ abstract class GameObject{
     public void moveTo(int x, int y){
         this.x = x;
         this.y = y;
-        this.draw();
+        if(Game.canvas != null){
+            this.draw();
+        }
     }
 
     public void setSpeed(double speed, double angle){
@@ -221,17 +223,21 @@ abstract class GameObject{
         
     }
     public void move(boolean bounce){
+        int rebound = 1;
         if(bounce){
-            if(this.left - this.dx < 0 || this.right + this.dx > Game.width){
+            this.updateRect();
+            if(this.left - this.dx <= 0 || this.right + this.dx >= Game.width){
                 this.dxsign = -this.dxsign;
+                rebound = 2;
             }
-            if(this.top - this.dy < 0 || this.bottom + this.dy > Game.height ){
+            if(this.top - this.dy <= 0 || this.bottom + this.dy >= Game.height ){
                 this.dysign = -this.dysign;
+                rebound = 2;
             }
         }
         this.calculateSpeedDeltas();
-        this.x += this.dx * this.dxsign;
-        this.y += this.dy * this.dysign;
+        this.x += this.dx * this.dxsign * rebound;
+        this.y += this.dy * this.dysign * rebound;
         this.draw();
     }
     public void move(){
@@ -474,17 +480,22 @@ class Shape extends GameObject{
             this.side = 4;
             this.width = arg1;
             this.height = arg2;
-            this.size = (int)(Math.sqrt(Math.pow(this.width,2) + Math.pow(this.height,2) / 2));
-            double angle1 = Math.PI - 2*Math.atan(this.width/this.height);
-            double angle2 = Math.PI - 2*Math.atan(this.height/this.width);
-            double tmp[] = {angle1/2,angle2,angle1,angle2};
-            this.reference_angles =  tmp;
+            this.updateRectangleAngles();
             this.XPoints = new int[4];
             this.YPoints = new int[4];
         }
     }
+    public void updateRectangleAngles(){
+        this.size = (int)(Math.sqrt(Math.pow(this.width,2) + Math.pow(this.height,2) / 2));
+        double angle1 = Math.PI - 2*Math.atan(this.width/this.height);
+        double angle2 = Math.PI - 2*Math.atan(this.height/this.width);
+        double tmp[] = {angle1/2,angle2,angle1,angle2};
+        this.reference_angles =  tmp;
+    }
     public void updatePoints(){
         double x = 0, y = 0, theta = 0;
+
+        this.updateRectangleAngles();
         for(int index = 0; index < this.side; index++){
             if(this.shape.equals("polygon")){
                 x = this.x + this.size * Math.cos(this.rotateAngle + this.reference_angle * index + this.angle_offset);
@@ -499,7 +510,6 @@ class Shape extends GameObject{
         }
     }
     public void draw(){
-        
         if(this.visible){
             Game.canvas.setPaint(this.color);
             this.updatePoints();
