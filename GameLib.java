@@ -28,19 +28,39 @@ class Font {
     public Color shadow;
 
     public Font(String family, int size) {
-        this.font = new java.awt.Font(family, java.awt.Font.BOLD, size);
+        this.selectFont(family, size);        
         this.color = Color.BLACK;
         this.shadow = null;
     }
     public Font(String family, int size, Color color) {
-        this.font = new java.awt.Font(family, java.awt.Font.BOLD, size);
+        this.selectFont(family, size); 
         this.color = color;
         this.shadow = null;
     }
     public Font(String family, int size, Color color, Color shadow) {
-        this.font = new java.awt.Font(family, java.awt.Font.BOLD, size);
+        this.selectFont(family, size); 
         this.color = color;
         this.shadow = shadow;
+    }
+    public void selectFont(String family, int size){
+        if(family.substring(family.length()-3).equals("ttf")){
+            try{
+                java.io.File fontFile = new File(family);
+                java.awt.Font customFont = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, fontFile);
+                font = customFont.deriveFont((float)size); // Set the desired font size
+                System.out.println("Font loaded");
+            }catch (FontFormatException e) {
+                e.printStackTrace();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }finally{
+                if(this.font == null){
+                    this.font = new java.awt.Font("Arial", java.awt.Font.BOLD, size);
+                }
+            }
+        }else{
+            this.font = new java.awt.Font(family, java.awt.Font.BOLD, size);
+        }
     }
 }
 
