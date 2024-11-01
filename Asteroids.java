@@ -4,14 +4,25 @@ import java.util.ArrayList;
 public class Asteroids implements GameLogic{
     Sprite bk,ship;
     Animation plasmaball, explosion, crash;
+    Shape healthBar, ammoBar;
     
     ArrayList<Animation> asteroids = new ArrayList<Animation>();
-    int speed = 2;
-    Coordinate you = new Coordinate(Game.width/2, Game.height/2);
+    class Player{
+        public static int score = 0;
+        public static int health = 100;
+        public static int ammo = 10;
+    }
 
     public Asteroids() {
         bk = new Animation("images/field_5.png",5,1000,1000,1);
-        for(int i = 0; i < 5; i++){
+        Game.setBackground(bk);
+
+        healthBar = new Shape("rectangle",100,10,Color.GREEN);
+        healthBar.moveTo(110,20);
+        ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
+        ammoBar.moveTo(110, 50);
+        
+        for(int i = 0; i < 10; i++){
             Animation asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
             int angle = Game.rnd(0,8) * 45 + 30;
             asteroid.setSpeed(4, angle);
@@ -27,14 +38,33 @@ public class Asteroids implements GameLogic{
         crash.visible = false;
         ship = new Sprite("images/hero.gif");
 
-        Game.setBackground(bk);
+        Game.state = "mainGame";
     }
+
     public String getTitle(){
         //Use in App.java to set the title of the JFrame
         return "Asteroids";
     }
+
     public void gameLoop(){
+        switch(Game.state){
+            case "startGame":
+                startGame();
+                break;
+            case "mainGame":
+                mainGame();
+                break;
+        } 
+    }
+
+    public void startGame(){
+
+    }
+    public void mainGame(){
         Game.drawBackground();
+        healthBar.draw();
+        ammoBar.draw();
+
         ship.move();
         crash.draw(false);
         for(Animation asteroid: asteroids){
@@ -44,11 +74,15 @@ public class Asteroids implements GameLogic{
                 plasmaball.visible = false;
                 explosion.visible = true;
                 explosion.moveTo(asteroid.x,asteroid.y);
+                Player.score += 10;
             }
             if(asteroid.collidedWith(ship,"circle")){
                 asteroid.visible = false;
                 crash.visible = true;
                 crash.moveTo(ship.x,ship.y);
+                Player.health -= 10;
+                healthBar.width = Player.health;
+                healthBar.x -= 10;
             }
         }
         
@@ -60,11 +94,14 @@ public class Asteroids implements GameLogic{
         }else{
             ship.speed = 0;
         }
-        if(Keys.pressed[Keys.SPACE] && !plasmaball.visible){
+        if(Keys.pressed[Keys.SPACE] && !plasmaball.visible && Player.ammo > 0){
             plasmaball.visible = true;
             plasmaball.moveTo(ship.x,ship.y);
             plasmaball.moveAngle = ship.moveAngle;
             plasmaball.speed = 6;
+            Player.ammo -= 1;
+            ammoBar.width -= 10;
+            ammoBar.x -= 10;
         }
         if(plasmaball.isOffScreen()){
             plasmaball.visible = false;
