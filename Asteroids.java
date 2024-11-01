@@ -5,6 +5,7 @@ public class Asteroids implements GameLogic{
     Sprite bk,ship;
     Animation plasmaball, explosion, crash;
     Shape healthBar, ammoBar;
+    Font gameFont, basicFont;
     
     ArrayList<Animation> asteroids = new ArrayList<Animation>();
     class Player{
@@ -38,7 +39,10 @@ public class Asteroids implements GameLogic{
         crash.visible = false;
         ship = new Sprite("images/hero.gif");
 
-        Game.state = "mainGame";
+        gameFont = new Font("images/Arka_solid.ttf",100,Color.WHITE,Color.CYAN);
+        basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
+
+        Game.state = "startGame";
     }
 
     public String getTitle(){
@@ -58,7 +62,13 @@ public class Asteroids implements GameLogic{
     }
 
     public void startGame(){
-
+        Game.drawBackground();
+        Game.drawText("Asteroids", 180, 150, gameFont);
+        Game.drawText("Press [SPACE] to start", 300,Game.height - 100,basicFont);
+        ship.draw();
+        if(Keys.pressed[Keys.SPACE]){
+            Game.state = "mainGame";
+        }
     }
     public void mainGame(){
         Game.drawBackground();
