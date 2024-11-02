@@ -8,6 +8,7 @@ public class Asteroids implements GameLogic{
     Font gameFont, basicFont;
     
     ArrayList<Animation> asteroids = new ArrayList<Animation>();
+    ArrayList<Animation> energies = new ArrayList<Animation>();
     class Player{
         public static int score = 0;
         public static int health = 100;
@@ -24,12 +25,23 @@ public class Asteroids implements GameLogic{
         ammoBar.moveTo(110, 50);
         
         for(int i = 0; i < 10; i++){
-            Animation asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
+            Animation asteroid;
+            if(Math.random() < 0.5){
+                asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
+            }else{
+                asteroid = new Animation("images/asteroid2.png",30, 960/30,32,1); 
+            } 
             int angle = Game.rnd(0,8) * 45 + 30;
             asteroid.setSpeed(4, angle);
             asteroid.x = Game.rnd(asteroid.width,Game.width-asteroid.width);
             asteroid.y = Game.rnd(asteroid.height,Game.height-asteroid.height);
             asteroids.add(asteroid);
+        }
+        for(int i = 0; i < 5; i++){
+            Animation energy = new Animation("images/plasmaball3.png",5,60,60,2);
+            energy.x = Game.rnd(energy.width,Game.width-energy.width);
+            energy.y = Game.rnd(energy.height,Game.height-energy.height);
+            energies.add(energy);
         }
         plasmaball = new Animation("images/plasmaball1.png",11,352/11,32,1);
         plasmaball.visible = false;
@@ -93,6 +105,23 @@ public class Asteroids implements GameLogic{
                 Player.health -= 10;
                 healthBar.width = Player.health;
                 healthBar.x -= 10;
+            }
+            for(Animation energy:energies){
+                if(asteroid.collidedWith(energy,"circle")){
+                    energy.visible = false;
+                    explosion.visible = true;
+                    explosion.moveTo(asteroid.x,asteroid.y);
+                }
+            }
+        }  
+
+        for(Animation energy:energies){
+            energy.draw();
+            if(ship.collidedWith(energy,"circle")){
+                energy.visible = false;
+                Player.ammo += 1;
+                ammoBar.width += 10;
+                ammoBar.x += 10;
             }
         }
         
