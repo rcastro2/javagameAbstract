@@ -7,7 +7,7 @@ public class Asteroids implements GameLogic{
     Shape healthBar, ammoBar;
     Font gameFont, basicFont;
     
-    ArrayList<Animation> asteroidsLevel1;
+    ArrayList<ArrayList<Animation>> asteroids = new ArrayList<>();
     ArrayList<Animation> energies;
     class Player{
         public static int score = 0;
@@ -24,9 +24,10 @@ public class Asteroids implements GameLogic{
         ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
         ammoBar.moveTo(110, 50);
         
-        asteroidsLevel1 = generateAsteroids(1, 5);
+        asteroids.add(generateAsteroids(1, 5,2));//Level 1
+        asteroids.add(generateAsteroids(2, 10,4));//Level 2
+        asteroids.add(generateAsteroids(3, 5,2));//Level 3
         
-
         energies = new ArrayList<Animation>();
         for(int i = 0; i < 5; i++){
             Animation energy = new Animation("images/plasmaball3.png",5,60,60,2);
@@ -81,7 +82,7 @@ public class Asteroids implements GameLogic{
         ship.move();
         crash.draw(false);
 
-        processAsteroids(asteroidsLevel1);
+        processAsteroids(asteroids.get(0));
         
         for(Animation energy:energies){
             energy.draw();
@@ -122,7 +123,7 @@ public class Asteroids implements GameLogic{
         }
     }
 
-    public ArrayList<Animation> generateAsteroids(int type, int amount){
+    public ArrayList<Animation> generateAsteroids(int type, int amount, int speed){
         ArrayList<Animation> asteroids = new ArrayList<>();
         for(int i = 0; i < amount; i++){
             Animation asteroid;
@@ -133,12 +134,15 @@ public class Asteroids implements GameLogic{
                 case 2:
                     asteroid = new Animation("images/asteroid2.png",30, 960/30,32,1);
                     break;
+                case 3:
+                    asteroid = new Animation("images/asteroid3.png",30, 510/6,500/5,2);
+                    break;
                 default:
                     asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
             }
              
             int angle = Game.rnd(0,8) * 45 + 30;
-            asteroid.setSpeed(2, angle);
+            asteroid.setSpeed(speed, angle);
             asteroid.x = Game.rnd(asteroid.width,Game.width-asteroid.width);
             asteroid.y = Game.rnd(asteroid.height,Game.height-asteroid.height);
             asteroids.add(asteroid);
