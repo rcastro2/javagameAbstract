@@ -24,15 +24,8 @@ public class Asteroids implements GameLogic{
         ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
         ammoBar.moveTo(110, 50);
         
-        asteroidsLevel1 = new ArrayList<Animation>();
-        for(int i = 0; i < 5; i++){
-            Animation asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
-            int angle = Game.rnd(0,8) * 45 + 30;
-            asteroid.setSpeed(2, angle);
-            asteroid.x = Game.rnd(asteroid.width,Game.width-asteroid.width);
-            asteroid.y = Game.rnd(asteroid.height,Game.height-asteroid.height);
-            asteroidsLevel1.add(asteroid);
-        }
+        asteroidsLevel1 = generateAsteroids(1, 5);
+        
 
         energies = new ArrayList<Animation>();
         for(int i = 0; i < 5; i++){
@@ -129,6 +122,29 @@ public class Asteroids implements GameLogic{
         }
     }
 
+    public ArrayList<Animation> generateAsteroids(int type, int amount){
+        ArrayList<Animation> asteroids = new ArrayList<>();
+        for(int i = 0; i < amount; i++){
+            Animation asteroid;
+            switch(type){
+                case 1:
+                    asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
+                    break;
+                case 2:
+                    asteroid = new Animation("images/asteroid2.png",30, 960/30,32,1);
+                    break;
+                default:
+                    asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
+            }
+             
+            int angle = Game.rnd(0,8) * 45 + 30;
+            asteroid.setSpeed(2, angle);
+            asteroid.x = Game.rnd(asteroid.width,Game.width-asteroid.width);
+            asteroid.y = Game.rnd(asteroid.height,Game.height-asteroid.height);
+            asteroids.add(asteroid);
+        }
+        return asteroids;
+    }
     public void processAsteroids(ArrayList<Animation> asteroids){
         for(Animation asteroid: asteroids){
             asteroid.move(true);
