@@ -11,7 +11,7 @@ public class Asteroids implements GameLogic{
     ArrayList<Animation> asteroids;
     ArrayList<Animation> energies;
     class Player{
-        public static int asteroidsDestroyed = 0;
+        public static int asteroidsAvaible = 0;
         public static int health = 100;
         public static int ammo = 20;
     }
@@ -50,10 +50,10 @@ public class Asteroids implements GameLogic{
                 startGame();
                 break;
             case "Level 1":
-                level(1);
+                level1();
                 break;
             case "Level 2":
-                level(2);
+                level2();
                 break;
             case "Level 3":
                 level3();
@@ -72,7 +72,7 @@ public class Asteroids implements GameLogic{
             Game.state = "Level 1";
         }
     }
-    public void level(int n){
+    public boolean levelCommonProcesses(){
         Game.drawBackground();
         healthBar.draw();
         ammoBar.draw();
@@ -82,45 +82,57 @@ public class Asteroids implements GameLogic{
         if(introCount < 200){
             Game.drawText(Game.state, 250, 200, gameFont);
             introCount++;
-            return;
+            return false;
         }
-        if(Player.asteroidsDestroyed == asteroids.size()){
-            Player.asteroidsDestroyed = 0;
-            introCount = 0;
-            energies = generateEnergies(1,n * 4);
-            asteroids = generateAsteroids(n + 1, 5*(n+1),n + 2);
-            Game.state = "Level " + (n + 1);
-        }
-        processAsteroids(asteroids);
-        processEnergies();
-
         heroControl();
         plasmaball.move();
         if(plasmaball.isOffScreen()){
             plasmaball.visible = false;
         }
         explosion.draw(false);
+        return true;
+    }
+    public void level1(){
+        if(levelCommonProcesses() == false){
+            return;
+        };
+        if(Player.asteroidsAvaible == 0){
+            introCount = 0;
+            energies = generateEnergies(1,10);
+            asteroids = generateAsteroids(2, 10,4);
+            Game.state = "Level 2";
+        }
+        processAsteroids(asteroids);
+        processEnergies();
+    }
+    public void level2(){
+        if(levelCommonProcesses() == false){
+            return;
+        };
+        if(Player.asteroidsAvaible == 0){
+            introCount = 0;
+            energies = generateEnergies(1,10);
+            asteroids = generateAsteroids(3, 5,2);
+            Player.asteroidsAvaible = 15;
+            Game.state = "Level 3";
+        }
+        processAsteroids(asteroids);
+        processEnergies();
     }
     public void level3(){
         ArrayList<Animation> newAsteroids = new ArrayList<>();
-        Game.drawBackground();
-        healthBar.draw();
-        ammoBar.draw();
-
-        ship.move();
-        crash.draw(false);
-        if(introCount < 200){
-            Game.drawText(Game.state, 250, 200, gameFont);
-            introCount++;
+        if(levelCommonProcesses() == false){
             return;
-        }
-        if(Player.asteroidsDestroyed == asteroids.size() * 3){
+        };
+        
+        if(Player.asteroidsAvaible == 0){
             Game.state = "Game Over";
         }
         for(Animation asteroid: asteroids){
             asteroid.move(true);
             if(plasmaball.collidedWith(asteroid,"circle")){
                 asteroid.visible = false;
+                Player.asteroidsAvaible--;
                 if((Integer)asteroid.get("hits") > 1){
                     for(int i = 0; i < 2; i++){
                         Animation a = new Animation("images/asteroid3.png",30, 510/6,500/5,0.5);
@@ -137,16 +149,21 @@ public class Asteroids implements GameLogic{
                 plasmaball.visible = false;
                 explosion.visible = true;
                 explosion.moveTo(asteroid.x,asteroid.y);
-                Player.asteroidsDestroyed++;
             }
             if(asteroid.collidedWith(ship,"circle")){
                 asteroid.visible = false;
                 crash.visible = true;
                 crash.moveTo(ship.x,ship.y);
-                Player.asteroidsDestroyed++;
-                Player.health -= 10;
+                if((Integer)asteroid.get("hits") > 1){
+                    Player.asteroidsAvaible -= 3;
+                    Player.health -= 30;
+                    healthBar.x -= 30;
+                }else{
+                    Player.asteroidsAvaible--;
+                    Player.health -= 10;
+                    healthBar.x -= 10;
+                }
                 healthBar.width = Player.health;
-                healthBar.x -= 10;
             }
             for(Animation energy:energies){
                 if(asteroid.collidedWith(energy,"circle")){
@@ -161,12 +178,6 @@ public class Asteroids implements GameLogic{
         }
         processEnergies();
 
-        heroControl();
-        plasmaball.move();
-        if(plasmaball.isOffScreen()){
-            plasmaball.visible = false;
-        }
-        explosion.draw(false);
     }
 
     public void heroControl(){
@@ -221,6 +232,7 @@ public class Asteroids implements GameLogic{
     }
 
     public ArrayList<Animation> generateAsteroids(int type, int amount, int speed){
+        Player.asteroidsAvaible = amount;
         ArrayList<Animation> asteroids = new ArrayList<>();
         for(int i = 0; i < amount; i++){
             Animation asteroid;
@@ -255,13 +267,13 @@ public class Asteroids implements GameLogic{
                 plasmaball.visible = false;
                 explosion.visible = true;
                 explosion.moveTo(asteroid.x,asteroid.y);
-                Player.asteroidsDestroyed++;
+                Player.asteroidsAvaible--;
             }
             if(asteroid.collidedWith(ship,"circle")){
                 asteroid.visible = false;
                 crash.visible = true;
                 crash.moveTo(ship.x,ship.y);
-                Player.asteroidsDestroyed++;
+                Player.asteroidsAvaible--;
                 Player.health -= 10;
                 healthBar.width = Player.health;
                 healthBar.x -= 10;
