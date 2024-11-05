@@ -11,9 +11,9 @@ public class Asteroids implements GameLogic{
     ArrayList<Animation> asteroids;
     ArrayList<Animation> energies;
     class Player{
-        public static int asteroidsAvaible = 0;
-        public static int health = 100;
-        public static int ammo = 20;
+        public static int asteroidsAvaible;
+        public static int health;
+        public static int ammo;
     }
 
     public Asteroids() {
@@ -58,6 +58,9 @@ public class Asteroids implements GameLogic{
             case "Level 3":
                 level3();
                 break;
+            case "Game Over":
+                gameOver();
+                break;
         } 
     }
 
@@ -67,10 +70,29 @@ public class Asteroids implements GameLogic{
         Game.drawText("Press [SPACE] to start", 300,Game.height - 100,basicFont);
         ship.draw();
         if(Keys.pressed[Keys.SPACE]){
+            Player.health = 100;
+            healthBar.width = 100;
+            Player.ammo = 20;
+            ammoBar.width = 100;
+            ship.moveTo(Game.width / 2, Game.height / 2);
+            ship.rotateAngle = 0;
+            ship.moveAngle = 0;
             energies = generateEnergies(1,5);
             asteroids = generateAsteroids(1, 5,2);
             Game.state = "Level 1";
         }
+    }
+    public void gameOver(){
+        Game.drawBackground();
+        Game.drawText("Game Over", 170, 150, gameFont);
+        Game.drawText("Play Again? [Y/N]", 300,Game.height - 100,basicFont);
+        
+        if(Keys.pressed[Keys.Y]){
+            Game.state = "startGame";
+        }else if(Keys.pressed[Keys.N]){
+            Game.exit();
+        }
+
     }
     public boolean levelCommonProcesses(){
         Game.drawBackground();
