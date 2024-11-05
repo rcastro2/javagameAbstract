@@ -72,8 +72,10 @@ public class Asteroids implements GameLogic{
         if(Keys.pressed[Keys.SPACE]){
             Player.health = 100;
             healthBar.width = 100;
+            healthBar.x = 110;
             Player.ammo = 20;
             ammoBar.width = 100;
+            ammoBar.x = 110;
             ship.moveTo(Game.width / 2, Game.height / 2);
             ship.rotateAngle = 0;
             ship.moveAngle = 0;
@@ -84,7 +86,7 @@ public class Asteroids implements GameLogic{
     }
     public void gameOver(){
         Game.drawBackground();
-        Game.drawText("Game Over", 170, 150, gameFont);
+        Game.drawText("Game Over", 150, 150, gameFont);
         Game.drawText("Play Again? [Y/N]", 300,Game.height - 100,basicFont);
         
         if(Keys.pressed[Keys.Y]){
@@ -222,6 +224,9 @@ public class Asteroids implements GameLogic{
             Player.ammo -= 1;
             ammoBar.width -= 5;
             ammoBar.x -= 5;
+        }
+        if(Player.health == 0){
+            Game.state = "Game Over";
         }
     }
     public ArrayList<Animation> generateEnergies(int type, int amount){
