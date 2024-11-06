@@ -225,8 +225,23 @@ public class Asteroids implements GameLogic{
             ammoBar.width -= 5;
             ammoBar.x -= 5;
         }
+        screenWrap(ship);
         if(Player.health == 0){
             Game.state = "Game Over";
+        }
+    }
+    public void screenWrap(Sprite obj){
+        if(obj.x < 0){
+            obj.x = Game.width;
+        }
+        if(obj.x > Game.width){
+            obj.x = 0;
+        }
+        if(obj.y < 0){
+            obj.y = Game.height;
+        }
+        if(obj.y > Game.height){
+            obj.y = 0;
         }
     }
     public ArrayList<Animation> generateEnergies(int type, int amount){
