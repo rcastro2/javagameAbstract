@@ -5,7 +5,7 @@ public class Asteroids implements GameLogic{
     Sprite bk,ship;
     Animation plasmaball, explosion, crash;
     Shape healthBar, ammoBar, asteroidBar;
-    Font gameFont, basicFont, barFont ;
+    Font gameFont, basicFont, barFont, winFont, loseFont;
     int introCount = 0;
     
     ArrayList<Animation> asteroids;
@@ -25,7 +25,7 @@ public class Asteroids implements GameLogic{
         ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
         ammoBar.moveTo(120, 50);
         asteroidBar = new Shape("rectangle",100,10,Color.CYAN);
-        asteroidBar.moveTo(Game.width - 130, 20);
+        asteroidBar.moveTo(120, 80);
 
         plasmaball = new Animation("images/plasmaball1.png",11,352/11,32,1);
         plasmaball.visible = false;
@@ -38,6 +38,8 @@ public class Asteroids implements GameLogic{
         gameFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.CYAN);
         basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
         barFont = new Font("Arial",18,Color.BLACK,Color.WHITE);
+        winFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.GREEN);
+        loseFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.RED);
 
         Game.state = "startGame";
     }
@@ -80,7 +82,7 @@ public class Asteroids implements GameLogic{
             ammoBar.width = 100;
             ammoBar.x = 120;
             asteroidBar.width = 100;
-            asteroidBar.x = Game.width - 130;
+            asteroidBar.x = 120;
             ship.moveTo(Game.width / 2, Game.height / 2);
             ship.rotateAngle = 0;
             ship.moveAngle = 0;
@@ -91,7 +93,12 @@ public class Asteroids implements GameLogic{
     }
     public void gameOver(){
         Game.drawBackground();
-        Game.drawText("Game Over", 150, 150, gameFont);
+        if(Player.health > 0){
+            Game.drawText("You Win!", 190, 150, winFont);
+        }else{
+            Game.drawText("You Lose", 180, 150, loseFont);
+        }
+        
         Game.drawText("Play Again? [Y/N]", 300,Game.height - 100,basicFont);
         
         if(Keys.pressed[Keys.Y]){
@@ -103,12 +110,18 @@ public class Asteroids implements GameLogic{
     }
     public boolean levelCommonProcesses(){
         Game.drawBackground();
+        healthBar.width = Player.health + 20;
+        healthBar.x = (int)(40 + Player.health);
         healthBar.draw();
-        Game.drawText(" " + Player.health, (int)(healthBar.x + healthBar.width / 2 + 10), healthBar.y + 5, barFont);
+        Game.drawText(" " + Player.health, 30, healthBar.y + 5, barFont);
+        ammoBar.width = Player.ammo * 5 + 20 ;
+        ammoBar.x = (int)(40 + Player.ammo * 5);
         ammoBar.draw();
-        Game.drawText(" " + Player.ammo, (int)(ammoBar.x + ammoBar.width / 2 + 10), ammoBar.y + 5, barFont);
+        Game.drawText(" " + Player.ammo, 30, ammoBar.y + 5, barFont);
+        asteroidBar.width = Player.asteroidsAvaible * 5 + 20;
+        asteroidBar.x = (int)(40 + Player.asteroidsAvaible * 5);
         asteroidBar.draw();
-        Game.drawText(" " + Player.asteroidsAvaible, (int)(asteroidBar.x - asteroidBar.width / 2 - 50), asteroidBar.y + 5, barFont);
+        Game.drawText(" " + Player.asteroidsAvaible, 30, asteroidBar.y + 5, barFont);
 
         ship.move();
         crash.draw(false);
