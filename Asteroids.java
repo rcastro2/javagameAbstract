@@ -70,9 +70,9 @@ public class Asteroids implements GameLogic{
     public void startGame(){
         Game.drawBackground();
         Game.drawText("Asteroids", 180, 150, gameFont);
-        Game.drawText("Press [SPACE] to start", 300,Game.height - 100,basicFont);
+        Game.drawText("Press [ENTER] to start", 300,Game.height - 100,basicFont);
         ship.draw();
-        if(Keys.pressed[Keys.SPACE]){
+        if(Keys.pressed[Keys.ENTER]){
             Player.health = 100;
             healthBar.width = 100;
             healthBar.x = 120;
@@ -129,87 +129,86 @@ public class Asteroids implements GameLogic{
     public void level1(){
         if(levelCommonProcesses() == false){
             return;
-        };
-        if(Player.asteroidsAvaible == 0){
+        }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(2, 10,3);
             Game.state = "Level 2";
+        }else{
+            processAsteroids(asteroids);
+            processEnergies();
         }
-        processAsteroids(asteroids);
-        processEnergies();
+
     }
     public void level2(){
         if(levelCommonProcesses() == false){
             return;
-        };
-        if(Player.asteroidsAvaible == 0){
+        }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(3, 5,2);
             Player.asteroidsAvaible = 15;
             Game.state = "Level 3";
+        }else{
+            processAsteroids(asteroids);
+            processEnergies();
         }
-        processAsteroids(asteroids);
-        processEnergies();
     }
     public void level3(){
-        ArrayList<Animation> newAsteroids = new ArrayList<>();
+        
         if(levelCommonProcesses() == false){
             return;
-        };
-        
-        if(Player.asteroidsAvaible == 0){
+        }else if(Player.asteroidsAvaible == 0){
             Game.state = "Game Over";
-        }
-        for(Animation asteroid: asteroids){
-            asteroid.move();
-            screenWrap(asteroid);
-            if(plasmaball.collidedWith(asteroid,"circle")){
-                asteroid.visible = false;
-                Player.asteroidsAvaible--;
-                if((Integer)asteroid.get("hits") > 1){
-                    for(int i = 0; i < 2; i++){
-                        Animation a = new Animation("images/asteroid3.png",30, 510/6,500/5,0.5);
-                        a.resizeBy(-50);
-                        a.set("hits",1);
-                        int angle = Game.rnd(0,8) * 45 + 30;
-                        a.setSpeed(2, angle);
-                        a.x = asteroid.x;
-                        a.y = asteroid.y;
-                        newAsteroids.add(a);
-                    }
-                }
-                
-                plasmaball.visible = false;
-                explosion.visible = true;
-                explosion.moveTo(asteroid.x,asteroid.y);
-            }
-            if(asteroid.collidedWith(ship,"circle")){
-                asteroid.visible = false;
-                crash.visible = true;
-                crash.moveTo(ship.x,ship.y);
-                if((Integer)asteroid.get("hits") > 1){
-                    Player.asteroidsAvaible -= 3;
-                    Player.health -= 30;
-                }else{
+        }else{
+            ArrayList<Animation> newAsteroids = new ArrayList<>();
+            for(Animation asteroid: asteroids){
+                asteroid.move();
+                screenWrap(asteroid);
+                if(plasmaball.collidedWith(asteroid,"circle")){
+                    asteroid.visible = false;
                     Player.asteroidsAvaible--;
-                    Player.health -= 10;
-                }
-            }
-            for(Animation energy:energies){
-                if(asteroid.collidedWith(energy,"circle")){
-                    energy.visible = false;
+                    if((Integer)asteroid.get("hits") > 1){
+                        for(int i = 0; i < 2; i++){
+                            Animation a = new Animation("images/asteroid3.png",30, 510/6,500/5,0.5);
+                            a.resizeBy(-50);
+                            a.set("hits",1);
+                            int angle = Game.rnd(0,8) * 45 + 30;
+                            a.setSpeed(2, angle);
+                            a.x = asteroid.x;
+                            a.y = asteroid.y;
+                            newAsteroids.add(a);
+                        }
+                    }
+                    plasmaball.visible = false;
                     explosion.visible = true;
                     explosion.moveTo(asteroid.x,asteroid.y);
                 }
+                if(asteroid.collidedWith(ship,"circle")){
+                    asteroid.visible = false;
+                    crash.visible = true;
+                    crash.moveTo(ship.x,ship.y);
+                    if((Integer)asteroid.get("hits") > 1){
+                        Player.asteroidsAvaible -= 3;
+                        Player.health -= 30;
+                    }else{
+                        Player.asteroidsAvaible--;
+                        Player.health -= 10;
+                    }
+                }
+                for(Animation energy:energies){
+                    if(asteroid.collidedWith(energy,"circle")){
+                        energy.visible = false;
+                        explosion.visible = true;
+                        explosion.moveTo(asteroid.x,asteroid.y);
+                    }
+                }
+            }  
+            for(Animation a: newAsteroids){
+                asteroids.add(a);
             }
-        }  
-        for(Animation a: newAsteroids){
-            asteroids.add(a);
+            processEnergies();
         }
-        processEnergies();
-
     }
 
     public void heroControl(){
@@ -232,7 +231,7 @@ public class Asteroids implements GameLogic{
             Player.ammo -= 1;
         }
         screenWrap(ship);
-        if(Player.health == 0){
+        if(Player.health <= 0){
             Game.state = "Game Over";
         }
     }
