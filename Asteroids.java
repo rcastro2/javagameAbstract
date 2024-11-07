@@ -4,8 +4,8 @@ import java.util.ArrayList;
 public class Asteroids implements GameLogic{
     Sprite bk,ship;
     Animation plasmaball, explosion, crash;
-    Shape healthBar, ammoBar;
-    Font gameFont, basicFont;
+    Shape healthBar, ammoBar, asteroidBar;
+    Font gameFont, basicFont, barFont ;
     int introCount = 0;
     
     ArrayList<Animation> asteroids;
@@ -21,9 +21,11 @@ public class Asteroids implements GameLogic{
         Game.setBackground(bk);
 
         healthBar = new Shape("rectangle",100,10,Color.GREEN);
-        healthBar.moveTo(110,20);
+        healthBar.moveTo(120,20);
         ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
-        ammoBar.moveTo(110, 50);
+        ammoBar.moveTo(120, 50);
+        asteroidBar = new Shape("rectangle",100,10,Color.CYAN);
+        asteroidBar.moveTo(Game.width - 130, 20);
 
         plasmaball = new Animation("images/plasmaball1.png",11,352/11,32,1);
         plasmaball.visible = false;
@@ -35,6 +37,7 @@ public class Asteroids implements GameLogic{
 
         gameFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.CYAN);
         basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
+        barFont = new Font("Arial",18,Color.BLACK,Color.WHITE);
 
         Game.state = "startGame";
     }
@@ -72,10 +75,12 @@ public class Asteroids implements GameLogic{
         if(Keys.pressed[Keys.SPACE]){
             Player.health = 100;
             healthBar.width = 100;
-            healthBar.x = 110;
+            healthBar.x = 120;
             Player.ammo = 20;
             ammoBar.width = 100;
-            ammoBar.x = 110;
+            ammoBar.x = 120;
+            asteroidBar.width = 100;
+            asteroidBar.x = Game.width - 130;
             ship.moveTo(Game.width / 2, Game.height / 2);
             ship.rotateAngle = 0;
             ship.moveAngle = 0;
@@ -99,16 +104,21 @@ public class Asteroids implements GameLogic{
     public boolean levelCommonProcesses(){
         Game.drawBackground();
         healthBar.draw();
+        Game.drawText(" " + Player.health, (int)(healthBar.x + healthBar.width / 2 + 10), healthBar.y + 5, barFont);
         ammoBar.draw();
+        Game.drawText(" " + Player.ammo, (int)(ammoBar.x + ammoBar.width / 2 + 10), ammoBar.y + 5, barFont);
+        asteroidBar.draw();
+        Game.drawText(" " + Player.asteroidsAvaible, (int)(asteroidBar.x - asteroidBar.width / 2 - 50), asteroidBar.y + 5, barFont);
 
         ship.move();
         crash.draw(false);
+        heroControl();
         if(introCount < 200){
             Game.drawText(Game.state, 250, 200, gameFont);
             introCount++;
             return false;
         }
-        heroControl();
+        
         plasmaball.move();
         if(plasmaball.isOffScreen()){
             plasmaball.visible = false;
@@ -182,13 +192,10 @@ public class Asteroids implements GameLogic{
                 if((Integer)asteroid.get("hits") > 1){
                     Player.asteroidsAvaible -= 3;
                     Player.health -= 30;
-                    healthBar.x -= 30;
                 }else{
                     Player.asteroidsAvaible--;
                     Player.health -= 10;
-                    healthBar.x -= 10;
                 }
-                healthBar.width = Player.health;
             }
             for(Animation energy:energies){
                 if(asteroid.collidedWith(energy,"circle")){
@@ -223,8 +230,6 @@ public class Asteroids implements GameLogic{
             plasmaball.moveAngle = ship.moveAngle;
             plasmaball.speed = 6;
             Player.ammo -= 1;
-            ammoBar.width -= 5;
-            ammoBar.x -= 5;
         }
         screenWrap(ship);
         if(Player.health == 0){
@@ -265,8 +270,6 @@ public class Asteroids implements GameLogic{
             if(ship.collidedWith(energy,"circle")){
                 energy.visible = false;
                 Player.ammo += 1;
-                ammoBar.width += 10;
-                ammoBar.x += 10;
             }
         }
     }
@@ -316,8 +319,6 @@ public class Asteroids implements GameLogic{
                 crash.moveTo(ship.x,ship.y);
                 Player.asteroidsAvaible--;
                 Player.health -= 10;
-                healthBar.width = Player.health;
-                healthBar.x -= 10;
             }
             for(Animation energy:energies){
                 if(asteroid.collidedWith(energy,"circle")){
