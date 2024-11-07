@@ -123,7 +123,7 @@ public class Asteroids implements GameLogic{
         if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
-            asteroids = generateAsteroids(2, 10,4);
+            asteroids = generateAsteroids(2, 10,3);
             Game.state = "Level 2";
         }
         processAsteroids(asteroids);
@@ -153,7 +153,8 @@ public class Asteroids implements GameLogic{
             Game.state = "Game Over";
         }
         for(Animation asteroid: asteroids){
-            asteroid.move(true);
+            asteroid.move();
+            screenWrap(asteroid);
             if(plasmaball.collidedWith(asteroid,"circle")){
                 asteroid.visible = false;
                 Player.asteroidsAvaible--;
@@ -231,16 +232,13 @@ public class Asteroids implements GameLogic{
         }
     }
     public void screenWrap(Sprite obj){
-        if(obj.x < 0){
+        if(obj.x <= 0){
             obj.x = Game.width;
-        }
-        if(obj.x > Game.width){
+        }else if(obj.x >= Game.width){
             obj.x = 0;
-        }
-        if(obj.y < 0){
+        }else if(obj.y <= 0){
             obj.y = Game.height;
-        }
-        if(obj.y > Game.height){
+        }else if(obj.y >= Game.height){
             obj.y = 0;
         }
     }
@@ -303,7 +301,8 @@ public class Asteroids implements GameLogic{
     }
     public void processAsteroids(ArrayList<Animation> asteroids){
         for(Animation asteroid: asteroids){
-            asteroid.move(true);
+            asteroid.move();
+            screenWrap(asteroid);
             if(plasmaball.collidedWith(asteroid,"circle")){
                 asteroid.visible = false;
                 plasmaball.visible = false;
