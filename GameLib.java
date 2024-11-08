@@ -277,7 +277,27 @@ abstract class GameObject{
         this.rotateAngle = (this.rotateAngle + rad ) % (2 * Math.PI) ;
         this.moveAngle = (this.moveAngle + rad) % (2 * Math.PI);
     }
-        
+
+    public double angleTo(GameObject obj){
+        double dx = obj.x - this.x;
+        double dy = obj.y - this.y;
+
+        if(dx == 0){
+            dx = 0.0001;
+        }
+        double angle = Math.atan(dy/dx) * 180 / Math.PI;
+        if(dx < 0){
+            angle += 180;
+        }
+        return angle;
+    }
+
+    public void rotateTowards(GameObject obj){
+        this.rotateAngle = Math.toRadians(this.angleTo(obj)) % (2 * Math.PI);
+        this.moveAngle = Math.toRadians(this.angleTo(obj)) % (2 * Math.PI);
+
+    }
+
     abstract public void draw();
     
     public boolean collidedWith(GameObject obj, String shape){
@@ -538,7 +558,7 @@ class Shape extends GameObject{
                 this.updatePoints();
                 Game.canvas.fillPolygon(this.XPoints,this.YPoints,this.side);
             }
-        }
+        } 
     }
 }
 
