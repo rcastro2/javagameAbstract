@@ -63,6 +63,9 @@ public class Asteroids implements GameLogic{
             case "Level 3":
                 level3();
                 break;
+            case "Level 4":
+                level4();
+                break;
             case "Game Over":
                 gameOver();
                 break;
@@ -145,7 +148,7 @@ public class Asteroids implements GameLogic{
         }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
-            asteroids = generateAsteroids(2, 10,3);
+            asteroids = generateAsteroids(2, 10,2);
             Game.state = "Level 2";
         }else{
             processAsteroids(asteroids);
@@ -172,7 +175,11 @@ public class Asteroids implements GameLogic{
         if(levelCommonProcesses() == false){
             return;
         }else if(Player.asteroidsAvaible == 0){
-            Game.state = "Game Over";
+            introCount = 0;
+            energies = generateEnergies(1,10);
+            asteroids = generateAsteroids(4, 5,2);
+            Player.asteroidsAvaible = 10;
+            Game.state = "Level 4";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
             for(Animation asteroid: asteroids){
@@ -192,6 +199,65 @@ public class Asteroids implements GameLogic{
                             a.y = asteroid.y;
                             newAsteroids.add(a);
                         }
+                    }
+                    plasmaball.visible = false;
+                    explosion.visible = true;
+                    explosion.moveTo(asteroid.x,asteroid.y);
+                }
+                if(asteroid.collidedWith(ship,"circle")){
+                    asteroid.visible = false;
+                    crash.visible = true;
+                    crash.moveTo(ship.x,ship.y);
+                    if((Integer)asteroid.get("hits") > 1){
+                        Player.asteroidsAvaible -= 3;
+                        Player.health -= 30;
+                    }else{
+                        Player.asteroidsAvaible--;
+                        Player.health -= 10;
+                    }
+                }
+                for(Animation energy:energies){
+                    if(asteroid.collidedWith(energy,"circle")){
+                        energy.visible = false;
+                        explosion.visible = true;
+                        explosion.moveTo(asteroid.x,asteroid.y);
+                    }
+                }
+            }  
+            for(Animation a: newAsteroids){
+                asteroids.add(a);
+            }
+            processEnergies();
+        }
+    }
+
+    public void level4(){
+        
+        if(levelCommonProcesses() == false){
+            return;
+        }else if(Player.asteroidsAvaible == 0){
+            Game.state = "Game Over";
+        }else{
+            ArrayList<Animation> newAsteroids = new ArrayList<>();
+            for(Animation asteroid: asteroids){
+                if((Integer)asteroid.get("hits") == 1){
+                    asteroid.rotateTowards(ship);
+                }
+                asteroid.move();
+                screenWrap(asteroid);
+                if(plasmaball.collidedWith(asteroid,"circle")){
+                    asteroid.visible = false;
+                    Player.asteroidsAvaible--;
+                    if((Integer)asteroid.get("hits") > 1){
+                        
+                        Animation a = new Animation("images/flame_gas2.png",25, 94,94,0.5);
+                        a.resizeBy(-25);
+                        a.set("hits",1);
+                        a.speed = 2;
+                        a.x = asteroid.x;
+                        a.y = asteroid.y;
+                        newAsteroids.add(a);
+                        
                     }
                     plasmaball.visible = false;
                     explosion.visible = true;
@@ -300,6 +366,11 @@ public class Asteroids implements GameLogic{
                     break;
                 case 3:
                     asteroid = new Animation("images/asteroid3.png",30, 510/6,500/5,0.5);
+                    asteroid.set("hits",2);
+                    break;
+                case 4:
+                    asteroid = new Animation("images/flame_gas.png",16, 512/4,512/4,0.25);
+                    asteroid.resizeBy(-25);
                     asteroid.set("hits",2);
                     break;
                 default:
