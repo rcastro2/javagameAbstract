@@ -152,6 +152,8 @@ public class Asteroids implements GameLogic{
             introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(2, 10,2);
+            Player.health += 10;
+            Player.ammo += 2;
             Game.state = "Level 2";
         }else{
             processAsteroids(asteroids);
@@ -166,7 +168,9 @@ public class Asteroids implements GameLogic{
             introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(3, 5,2);
-            Player.asteroidsAvaible = 15;
+            Player.asteroidsAvaible = 20;
+            Player.health += 10;
+            Player.ammo += 2;
             Game.state = "Level 3";
         }else{
             processAsteroids(asteroids);
@@ -174,14 +178,15 @@ public class Asteroids implements GameLogic{
         }
     }
     public void level3(){
-        
         if(levelCommonProcesses() == false){
             return;
         }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
-            asteroids = generateAsteroids(4, 5,2);
-            Player.asteroidsAvaible = 10;
+            asteroids = generateAsteroids(4, 10,2);
+            Player.asteroidsAvaible = 20;
+            Player.health += 10;
+            Player.ammo += 2;
             Game.state = "Level 4";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -192,11 +197,11 @@ public class Asteroids implements GameLogic{
                     asteroid.visible = false;
                     Player.asteroidsAvaible--;
                     if((Integer)asteroid.get("hits") > 1){
-                        for(int i = 0; i < 2; i++){
+                        for(int i = 0; i < 3; i++){
                             Animation a = new Animation("images/asteroid3.png",30, 510/6,500/5,0.5);
                             a.resizeBy(-50);
                             a.set("hits",1);
-                            int angle = Game.rnd(0,8) * 45 + 30;
+                            int angle = Game.rnd(0,10) * 36 + 30;
                             a.setSpeed(2, angle);
                             a.x = asteroid.x;
                             a.y = asteroid.y;
@@ -212,8 +217,8 @@ public class Asteroids implements GameLogic{
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
                     if((Integer)asteroid.get("hits") > 1){
-                        Player.asteroidsAvaible -= 3;
-                        Player.health -= 30;
+                        Player.asteroidsAvaible -= 4;
+                        Player.health -= 40;
                     }else{
                         Player.asteroidsAvaible--;
                         Player.health -= 10;
@@ -235,23 +240,20 @@ public class Asteroids implements GameLogic{
     }
 
     public void level4(){
-        
         if(levelCommonProcesses() == false){
             return;
         }else if(Player.asteroidsAvaible == 0){
+            introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(5, 12,2);
             double theta = Math.PI / 6;
             double angle = 0;
             for(Animation asteroid: asteroids){
-                double x = 350 * Math.cos(angle) + Game.width / 2;
-                double y = 350 * Math.sin(angle) + Game.height / 2;
-                asteroid.moveTo((int)x,(int)y);
                 asteroid.set("angle",angle);
                 angle += theta;
-                asteroid.speed = 0;
             }
-            Player.asteroidsAvaible = 12;
+            Player.health += 10;
+            Player.ammo += 2;
             Game.state = "Level 5";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -284,8 +286,8 @@ public class Asteroids implements GameLogic{
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
                     if((Integer)asteroid.get("hits") > 1){
-                        Player.asteroidsAvaible -= 3;
-                        Player.health -= 30;
+                        Player.asteroidsAvaible -= 2;
+                        Player.health -= 20;
                     }else{
                         Player.asteroidsAvaible--;
                         Player.health -= 10;
@@ -325,7 +327,7 @@ public class Asteroids implements GameLogic{
                     double y = 350 * Math.sin(angle) + Game.height / 2;
                     asteroid.moveTo((int)x,(int)y);
                     asteroid.set("angle",angle);  
-                    if(Math.random() < 0.001){
+                    if(Math.random() < 0.005){
                         asteroid.set("hits",1);
                     }
                 }
@@ -414,7 +416,7 @@ public class Asteroids implements GameLogic{
             energy.draw();
             if(ship.collidedWith(energy,"circle")){
                 energy.visible = false;
-                Player.ammo += 1;
+                Player.ammo += 2;
             }
         }
     }
