@@ -47,7 +47,6 @@ class Font {
                 java.io.File fontFile = new File(family);
                 java.awt.Font customFont = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, fontFile);
                 font = customFont.deriveFont((float)size); // Set the desired font size
-                System.out.println("Font loaded");
             }catch (FontFormatException e) {
                 e.printStackTrace();
             }catch (IOException e) {
@@ -276,6 +275,7 @@ abstract class GameObject{
         }
         this.rotateAngle = (this.rotateAngle + rad ) % (2 * Math.PI) ;
         this.moveAngle = (this.moveAngle + rad) % (2 * Math.PI);
+        this.calculateSpeedDeltas();
     }
 
     public double angleTo(GameObject obj){
@@ -386,26 +386,29 @@ class Sprite extends GameObject{
 
     public void draw(){
         if(this.visible){
-            AffineTransform oldTransform = Game.canvas.getTransform();
-
+            Graphics2D g2d = (Graphics2D) Game.canvas;
+            AffineTransform oldTransform = g2d.getTransform();
+    
+            // Set the rotation and scaling transformation
+            AffineTransform transform = new AffineTransform();
+            
             // Translate to the object's position
-            Game.canvas.translate(this.x, this.y);
-            // Rotate around the center of the image
-            Game.canvas.rotate(this.rotateAngle + Math.PI / 2);
-
-            // Draw the image centered at (0, 0)
-            Game.canvas.drawImage(i,
-                (int)(-this.width / 2 * this.scale), 
-                (int)(-this.height / 2 * this.scale), 
-                (int)(this.width / 2 * this.scale), 
-                (int)(this.height / 2 * this.scale), 
-                0, 0, 
-                (int)this.width, 
-                (int)this.height, 
-                null);
-
+            transform.translate(this.x, this.y);
+            
+            // Rotate around the center of the image (width / 2, height / 2)
+            transform.rotate(this.rotateAngle + Math.PI / 2, 0, 0);
+            
+            // Apply the scaling
+            transform.scale(this.scale, this.scale);
+            
+            // Set the transformation to the graphics context
+            g2d.setTransform(transform);
+    
+            // Draw the image centered at (0, 0) in the transformed space
+            g2d.drawImage(i, (int) (-this.width / 2), (int) (-this.height / 2), null);
+    
             // Restore the previous transformation
-            Game.canvas.setTransform(oldTransform);
+            g2d.setTransform(oldTransform);
         }
         updateRect();
         drawBoundaries();
