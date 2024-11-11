@@ -66,6 +66,9 @@ public class Asteroids implements GameLogic{
             case "Level 4":
                 level4();
                 break;
+            case "Level 5":
+                level5();
+                break;
             case "Game Over":
                 gameOver();
                 break;
@@ -236,7 +239,20 @@ public class Asteroids implements GameLogic{
         if(levelCommonProcesses() == false){
             return;
         }else if(Player.asteroidsAvaible == 0){
-            Game.state = "Game Over";
+            energies = generateEnergies(1,10);
+            asteroids = generateAsteroids(5, 12,2);
+            double theta = Math.PI / 6;
+            double angle = 0;
+            for(Animation asteroid: asteroids){
+                double x = 350 * Math.cos(angle) + Game.width / 2;
+                double y = 350 * Math.sin(angle) + Game.height / 2;
+                asteroid.moveTo((int)x,(int)y);
+                asteroid.set("angle",angle);
+                angle += theta;
+                asteroid.speed = 0;
+            }
+            Player.asteroidsAvaible = 12;
+            Game.state = "Level 5";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
             for(Animation asteroid: asteroids){
@@ -286,6 +302,57 @@ public class Asteroids implements GameLogic{
             for(Animation a: newAsteroids){
                 asteroids.add(a);
             }
+            processEnergies();
+        }
+    }
+
+    public void level5(){
+        
+        if(levelCommonProcesses() == false){
+            return;
+        }else if(Player.asteroidsAvaible == 0){
+            Game.state = "Game Over";
+        }else{
+            double theta = Math.PI / 360;
+            for(Animation asteroid: asteroids){
+                if((Integer)asteroid.get("hits") == 1){
+                    asteroid.rotateTowards(ship);
+                    asteroid.speed = 2;
+                    asteroid.move();
+                }else{
+                    double angle = (Double)asteroid.get("angle") + theta;
+                    double x = 350 * Math.cos(angle) + Game.width / 2;
+                    double y = 350 * Math.sin(angle) + Game.height / 2;
+                    asteroid.moveTo((int)x,(int)y);
+                    asteroid.set("angle",angle);  
+                    if(Math.random() < 0.001){
+                        asteroid.set("hits",1);
+                    }
+                }
+              
+                screenWrap(asteroid);
+                if(plasmaball.collidedWith(asteroid,"circle")){
+                    asteroid.visible = false;
+                    Player.asteroidsAvaible--;
+                    plasmaball.visible = false;
+                    explosion.visible = true;
+                    explosion.moveTo(asteroid.x,asteroid.y);
+                }
+                if(asteroid.collidedWith(ship,"circle")){
+                    asteroid.visible = false;
+                    crash.visible = true;
+                    crash.moveTo(ship.x,ship.y);
+                    Player.asteroidsAvaible--;
+                    Player.health -= 10;
+                }
+                for(Animation energy:energies){
+                    if(asteroid.collidedWith(energy,"circle")){
+                        energy.visible = false;
+                        explosion.visible = true;
+                        explosion.moveTo(asteroid.x,asteroid.y);
+                    }
+                }
+            }  
             processEnergies();
         }
     }
@@ -370,6 +437,11 @@ public class Asteroids implements GameLogic{
                     break;
                 case 4:
                     asteroid = new Animation("images/flame_gas.png",16, 512/4,512/4,0.25);
+                    asteroid.resizeBy(-25);
+                    asteroid.set("hits",2);
+                    break;
+                case 5:
+                    asteroid = new Animation("images/asteroid4.png",48, 128,128,0.5);
                     asteroid.resizeBy(-25);
                     asteroid.set("hits",2);
                     break;
