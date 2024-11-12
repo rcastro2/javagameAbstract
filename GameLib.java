@@ -453,26 +453,35 @@ class Animation extends Sprite{
             int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
             int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;             
             // Save the current transformation
-            AffineTransform oldTransform = Game.canvas.getTransform();
+            Graphics2D g2d = (Graphics2D) Game.canvas;
+            AffineTransform oldTransform = g2d.getTransform();
 
-            // Translate to the object's position
-            Game.canvas.translate(this.x, this.y);
-            // Rotate around the center of the image
-            Game.canvas.rotate(this.rotateAngle);
+            // Set the rotation and scaling transformation
+            AffineTransform transform = new AffineTransform();
 
-            // Draw the image centered at (0, 0)
-            Game.canvas.drawImage(i,
-                (int)(-this.frame_width / 2 * this.scale), 
-                (int)(-this.frame_height / 2 * this.scale), 
-                (int)(this.frame_width / 2 * this.scale), 
-                (int)(this.frame_height / 2 * this.scale), 
+            // Translate to the object's position (center of the object)
+            transform.translate(this.x, this.y);
+
+            // Rotate around the center of the image (width / 2, height / 2)
+            transform.rotate(this.rotateAngle, 0, 0);
+
+            // Apply the scaling
+            transform.scale(this.scale, this.scale);
+
+            // Set the transformation to the graphics context
+            g2d.setTransform(transform);
+
+            // Draw the correct frame from the sprite sheet
+            g2d.drawImage(i,
+                (int) (-this.frame_width / 2), (int) (-this.frame_height / 2), 
+                (int) (this.frame_width / 2), (int) (this.frame_height / 2), 
                 sourceStartX, sourceStartY, 
-                sourceStartX + (int)this.frame_width, 
-                sourceStartY + (int)this.frame_height, 
+                sourceStartX + (int) this.frame_width, 
+                sourceStartY + (int) this.frame_height, 
                 null);
-
+                
             // Restore the previous transformation
-            Game.canvas.setTransform(oldTransform);    
+            g2d.setTransform(oldTransform);   
             this.frame_count += this.frame_rate;
             if(this.frame_count > 1){
                 this.frame_count = 0;
