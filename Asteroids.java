@@ -383,17 +383,32 @@ public class Asteroids implements GameLogic{
             Game.state = "Game Over";
         }
     }
-    public void screenWrap(Sprite obj){
-        if(obj.x <= 0){
-            obj.x = Game.width;
-        }else if(obj.x >= Game.width){
-            obj.x = 0;
-        }else if(obj.y <= 0){
-            obj.y = Game.height;
-        }else if(obj.y >= Game.height){
-            obj.y = 0;
+
+    public void screenWrap(Sprite obj) {
+        double x = obj.x,y = obj.y;
+        
+        if (obj.x - obj.width / 4 < 0) { 
+            x = Game.width - obj.width / 4; 
+        }else if (obj.x + obj.width / 4 > Game.width) { 
+            x = obj.width / 4; 
         }
+    
+        if (obj.y - obj.height / 4 < 0) { 
+            y = Game.height - obj.height / 4; 
+        } else if (obj.y + obj.height / 4 > Game.height) { 
+            y = obj.height / 4; 
+        }
+    
+        if(obj.x != x){
+            obj.x = (int) x;
+        }   
+        if(obj.y != y){
+            obj.y = (int) y;
+        }   
     }
+        
+    
+    
     public ArrayList<Animation> generateEnergies(int type, int amount){
         ArrayList<Animation> energies = new ArrayList<>();
         for(int i = 0; i < amount; i++){
