@@ -2,8 +2,8 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class Asteroids implements GameLogic{
-    Sprite bk,ship;
-    Animation plasmaball, explosion, crash;
+    Sprite bk,ship, boss;
+    Animation plasmaball, explosion, crash, bossEnergy;
     Shape healthBar, ammoBar, asteroidBar;
     Font gameFont, basicFont, barFont, winFont, loseFont;
     int introCount = 0;
@@ -14,6 +14,8 @@ public class Asteroids implements GameLogic{
         public static int asteroidsAvaible;
         public static int health;
         public static int ammo;
+        public static int bonusAmmo = 5;
+        public static int bonusHeath = 10;
     }
 
     public Asteroids() {
@@ -34,6 +36,11 @@ public class Asteroids implements GameLogic{
         crash = new Animation("images/explosion4.png",20,640 / 5, 512 / 4,2);
         crash.visible = false;
         ship = new Sprite("images/hero.gif");
+
+        boss = new Sprite("images/boss2.png");
+        bossEnergy = new Animation("images/nova.png",5, 80, 80,1);
+        boss.resizeBy(-75);
+
 
         gameFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.CYAN);
         basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
@@ -68,6 +75,9 @@ public class Asteroids implements GameLogic{
                 break;
             case "Level 5":
                 level5();
+                break;
+            case "Final Level":
+                levelFinal();
                 break;
             case "Game Over":
                 gameOver();
@@ -114,7 +124,7 @@ public class Asteroids implements GameLogic{
         }
 
     }
-    public boolean levelCommonProcesses(){
+    public boolean levelCommonProcesses(int offsetX, int offsetY){
         Game.drawBackground();
         healthBar.width = Player.health + 20;
         healthBar.x = (int)(40 + Player.health);
@@ -133,7 +143,7 @@ public class Asteroids implements GameLogic{
         crash.draw(false);
         heroControl();
         if(introCount < 200){
-            Game.drawText(Game.state, 250, 200, gameFont);
+            Game.drawText(Game.state, 250 + offsetX, 200 + offsetY, gameFont);
             introCount++;
             return false;
         }
@@ -145,6 +155,9 @@ public class Asteroids implements GameLogic{
         explosion.draw(false);
         return true;
     }
+    public boolean levelCommonProcesses(){
+        return levelCommonProcesses(0,0);
+    }
     public void level1(){
         if(levelCommonProcesses() == false){
             return;
@@ -152,8 +165,8 @@ public class Asteroids implements GameLogic{
             introCount = 0;
             energies = generateEnergies(1,10);
             asteroids = generateAsteroids(2, 10,2);
-            Player.health += 10;
-            Player.ammo += 2;
+            Player.health += Player.bonusHeath;
+            Player.ammo += Player.bonusAmmo;
             Game.state = "Level 2";
         }else{
             processAsteroids(asteroids);
@@ -167,10 +180,10 @@ public class Asteroids implements GameLogic{
         }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
-            asteroids = generateAsteroids(3, 5,2);
-            Player.asteroidsAvaible = 20;
-            Player.health += 10;
-            Player.ammo += 2;
+            asteroids = generateAsteroids(3, 4,2);
+            Player.asteroidsAvaible = 16;
+            Player.health += Player.bonusHeath;
+            Player.ammo += Player.bonusAmmo;
             Game.state = "Level 3";
         }else{
             processAsteroids(asteroids);
@@ -183,10 +196,10 @@ public class Asteroids implements GameLogic{
         }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
             energies = generateEnergies(1,10);
-            asteroids = generateAsteroids(4, 10,2);
-            Player.asteroidsAvaible = 20;
-            Player.health += 10;
-            Player.ammo += 2;
+            asteroids = generateAsteroids(4, 8,2);
+            Player.asteroidsAvaible = 16;
+            Player.health += Player.bonusHeath;
+            Player.ammo += Player.bonusAmmo;
             Game.state = "Level 4";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -252,8 +265,8 @@ public class Asteroids implements GameLogic{
                 asteroid.set("angle",angle);
                 angle += theta;
             }
-            Player.health += 10;
-            Player.ammo += 2;
+            Player.health += Player.bonusHeath;
+            Player.ammo += Player.bonusAmmo;
             Game.state = "Level 5";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -268,8 +281,8 @@ public class Asteroids implements GameLogic{
                     Player.asteroidsAvaible--;
                     if((Integer)asteroid.get("hits") > 1){
                         
-                        Animation a = new Animation("images/flame_gas2.png",25, 94,94,0.5);
-                        a.resizeBy(-25);
+                        Animation a = new Animation("images/flame_gas.png",16, 512/4,512/4,0.25);
+                        a.resizeBy(-60);
                         a.set("hits",1);
                         a.speed = 2;
                         a.x = asteroid.x;
@@ -313,7 +326,16 @@ public class Asteroids implements GameLogic{
         if(levelCommonProcesses() == false){
             return;
         }else if(Player.asteroidsAvaible == 0){
-            Game.state = "Game Over";
+            introCount = 0;
+            energies = generateEnergies(1,10);
+            asteroids = generateAsteroids(6, 10,2);
+            for(Animation asteroid:asteroids){
+                asteroid.moveTo(bossEnergy.x,bossEnergy.y);
+            }
+            Player.asteroidsAvaible = 20;
+            Player.health += Player.bonusHeath;
+            Player.ammo += Player.bonusAmmo;
+            Game.state = "Final Level";
         }else{
             double theta = Math.PI / 360;
             for(Animation asteroid: asteroids){
@@ -356,6 +378,57 @@ public class Asteroids implements GameLogic{
                 }
             }  
             processEnergies();
+        }
+    }
+
+    public void levelFinal(){
+
+        if(levelCommonProcesses(-100,0) == false){
+            return;
+        }else if(Player.asteroidsAvaible == 0){
+            Game.state = "Game Over";
+        }else{
+            boss.rotateBy(0.5, "left");
+            boss.draw();
+            bossEnergy.rotateBy(0.5,"right");
+            bossEnergy.draw();
+            for(Animation asteroid: asteroids){
+                asteroid.move();
+                if(asteroid.get("hits").equals("2")){
+                    if(Math.random() < 0.005){
+                        asteroid.set("hits",1);
+                        int angle = Game.rnd(0,180) * 2 + 15;
+                        asteroid.setSpeed(3, angle);
+                    }
+                }else{
+                    asteroid.move();
+                    if(asteroid.isOffScreen()){
+                        int angle = Game.rnd(0,180) * 2 + 15;
+                        asteroid.setSpeed(3, angle);
+                        asteroid.moveTo(bossEnergy.x,bossEnergy.y);
+                    }
+                }
+                if(asteroid.collidedWith(ship,"circle")){
+                    asteroid.visible = false;
+                    crash.visible = true;
+                    crash.moveTo(ship.x,ship.y);
+                    Player.health -= 10;
+                }
+                for(Animation energy:energies){
+                    if(asteroid.collidedWith(energy,"circle")){
+                        energy.visible = false;
+                        explosion.visible = true;
+                        explosion.moveTo(asteroid.x,asteroid.y);
+                    }
+                }
+            }  
+            processEnergies();
+        }
+        if(plasmaball.collidedWith(boss,"circle")){
+            Player.asteroidsAvaible--;
+            plasmaball.visible = false;
+            explosion.visible = true;
+            explosion.moveTo(plasmaball.x,plasmaball.y);
         }
     }
 
@@ -407,8 +480,6 @@ public class Asteroids implements GameLogic{
         }   
     }
         
-    
-    
     public ArrayList<Animation> generateEnergies(int type, int amount){
         ArrayList<Animation> energies = new ArrayList<>();
         for(int i = 0; i < amount; i++){
@@ -454,7 +525,7 @@ public class Asteroids implements GameLogic{
                     break;
                 case 4:
                     asteroid = new Animation("images/flame_gas.png",16, 512/4,512/4,0.25);
-                    asteroid.resizeBy(-25);
+                    asteroid.resizeBy(-30);
                     asteroid.set("hits",2);
                     break;
                 case 5:
@@ -462,11 +533,16 @@ public class Asteroids implements GameLogic{
                     asteroid.resizeBy(-25);
                     asteroid.set("hits",2);
                     break;
+                case 6:
+                    asteroid = new Animation("images/nova.png",5, 80, 80,1);
+                    asteroid.resizeBy(-50);
+                    asteroid.set("hits",2);
+                    break;
                 default:
                     asteroid = new Animation("images/asteroid1t.gif",41, 2173/41,52,1); 
             }
              
-            int angle = Game.rnd(0,8) * 45 + 30;
+            int angle = Game.rnd(0,12) * 30 + 15;
             asteroid.setSpeed(speed, angle);
             asteroid.x = Game.rnd(asteroid.width,Game.width-asteroid.width);
             asteroid.y = Game.rnd(asteroid.height,Game.height-asteroid.height);
