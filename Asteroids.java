@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Asteroids implements GameLogic{
     Sprite bk,ship, boss;
-    Animation plasmaball, explosion, crash, bossEnergy;
+    Animation plasmaball, explosion, crash, bossEnergy, shield;
     Shape healthBar, ammoBar, asteroidBar;
     Font gameFont, basicFont, barFont, winFont, loseFont;
     int introCount = 0;
@@ -14,6 +14,7 @@ public class Asteroids implements GameLogic{
         public static int asteroidsAvaible;
         public static int health;
         public static int ammo;
+        public static int shield = 100;
         public static int bonusAmmo = 5;
         public static int bonusHeath = 10;
     }
@@ -36,11 +37,11 @@ public class Asteroids implements GameLogic{
         crash = new Animation("images/explosion4.png",20,640 / 5, 512 / 4,2);
         crash.visible = false;
         ship = new Sprite("images/hero.gif");
+        shield = new Animation("images/aura.png",16,512/4,512/4,1);
 
         boss = new Sprite("images/boss2.png");
         bossEnergy = new Animation("images/nova.png",5, 80, 80,1);
         boss.resizeBy(-75);
-
 
         gameFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.CYAN);
         basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
@@ -90,6 +91,7 @@ public class Asteroids implements GameLogic{
         Game.drawText("Asteroids", 180, 150, gameFont);
         Game.drawText("Press [ENTER] to start", 300,Game.height - 100,basicFont);
         ship.draw();
+        
         if(Keys.pressed[Keys.ENTER]){
             Player.health = 100;
             healthBar.width = 100;
@@ -138,7 +140,9 @@ public class Asteroids implements GameLogic{
         asteroidBar.x = (int)(40 + Player.asteroidsAvaible * 5);
         asteroidBar.draw();
         Game.drawText(" " + Player.asteroidsAvaible, 30, asteroidBar.y + 5, barFont);
-
+        if(Player.shield > 0){
+            shield.moveTo(ship.x,ship.y);
+        }
         ship.move();
         crash.draw(false);
         heroControl();
@@ -146,6 +150,9 @@ public class Asteroids implements GameLogic{
             Game.drawText(Game.state, 250 + offsetX, 200 + offsetY, gameFont);
             introCount++;
             return false;
+        }
+        if(Player.shield > 0){
+            Player.shield--;
         }
         
         plasmaball.move();
@@ -167,6 +174,7 @@ public class Asteroids implements GameLogic{
             asteroids = generateAsteroids(2, 10,2);
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.shield = 100;
             Game.state = "Level 2";
         }else{
             processAsteroids(asteroids);
@@ -184,6 +192,7 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 16;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.shield = 100;
             Game.state = "Level 3";
         }else{
             processAsteroids(asteroids);
@@ -200,6 +209,7 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 16;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.shield = 100;
             Game.state = "Level 4";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -225,7 +235,7 @@ public class Asteroids implements GameLogic{
                     explosion.visible = true;
                     explosion.moveTo(asteroid.x,asteroid.y);
                 }
-                if(asteroid.collidedWith(ship,"circle")){
+                if(asteroid.collidedWith(ship,"circle") && Player.shield == 0){
                     asteroid.visible = false;
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
@@ -267,6 +277,7 @@ public class Asteroids implements GameLogic{
             }
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.shield = 100;
             Game.state = "Level 5";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
@@ -294,7 +305,7 @@ public class Asteroids implements GameLogic{
                     explosion.visible = true;
                     explosion.moveTo(asteroid.x,asteroid.y);
                 }
-                if(asteroid.collidedWith(ship,"circle")){
+                if(asteroid.collidedWith(ship,"circle") && Player.shield == 0){
                     asteroid.visible = false;
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
@@ -335,6 +346,7 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 20;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.shield = 100;
             Game.state = "Final Level";
         }else{
             double theta = Math.PI / 360;
@@ -362,7 +374,7 @@ public class Asteroids implements GameLogic{
                     explosion.visible = true;
                     explosion.moveTo(asteroid.x,asteroid.y);
                 }
-                if(asteroid.collidedWith(ship,"circle")){
+                if(asteroid.collidedWith(ship,"circle") && Player.shield == 0){
                     asteroid.visible = false;
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
@@ -408,7 +420,7 @@ public class Asteroids implements GameLogic{
                         asteroid.moveTo(bossEnergy.x,bossEnergy.y);
                     }
                 }
-                if(asteroid.collidedWith(ship,"circle")){
+                if(asteroid.collidedWith(ship,"circle") && Player.shield == 0){
                     asteroid.visible = false;
                     crash.visible = true;
                     crash.moveTo(ship.x,ship.y);
@@ -561,7 +573,7 @@ public class Asteroids implements GameLogic{
                 explosion.moveTo(asteroid.x,asteroid.y);
                 Player.asteroidsAvaible--;
             }
-            if(asteroid.collidedWith(ship,"circle")){
+            if(asteroid.collidedWith(ship,"circle") && Player.shield == 0){
                 asteroid.visible = false;
                 crash.visible = true;
                 crash.moveTo(ship.x,ship.y);
