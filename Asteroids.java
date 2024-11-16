@@ -427,7 +427,6 @@ public class Asteroids implements GameLogic{
                     Player.health -= 10;
                 }
                 if(plasmaball.collidedWith(asteroid,"circle")){
-                    asteroid.visible = false;
                     plasmaball.visible = false;
                     explosion.visible = true;
                     explosion.moveTo(asteroid.x,asteroid.y);
@@ -438,11 +437,6 @@ public class Asteroids implements GameLogic{
                         explosion.visible = true;
                         explosion.moveTo(asteroid.x,asteroid.y);
                     }
-                }
-                if(plasmaball.collidedWith(asteroid,"circle")){
-                    plasmaball.visible = false;
-                    explosion.visible = true;
-                    explosion.moveTo(asteroid.x,asteroid.y);
                 }
             }  
             for(Animation energy:energies){
@@ -467,15 +461,15 @@ public class Asteroids implements GameLogic{
     }
 
     public void heroControl(){
-        if(Keys.pressed[Keys.UP]){
+        if(Keys.pressed[Keys.UP] || Keys.pressed[Keys.W]){
             ship.speed = 4;
         }else{
             ship.speed = 0;
         }
-        if(Keys.pressed[Keys.LEFT]){
+        if(Keys.pressed[Keys.LEFT] || Keys.pressed[Keys.A] ){
             ship.rotateBy(3,"left"); 
         }
-        if(Keys.pressed[Keys.RIGHT]){
+        if(Keys.pressed[Keys.RIGHT] || Keys.pressed[Keys.D]){
             ship.rotateBy(3,"right");  
         } 
         if(Keys.pressed[Keys.SPACE] && !plasmaball.visible && Player.ammo > 0){
