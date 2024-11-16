@@ -338,7 +338,7 @@ public class Asteroids implements GameLogic{
             return;
         }else if(Player.asteroidsAvaible == 0){
             introCount = 0;
-            energies = generateEnergies(1,10);
+            energies = generateEnergies(1,5);
             asteroids = generateAsteroids(6, 10,2);
             for(Animation asteroid:asteroids){
                 asteroid.moveTo(bossEnergy.x,bossEnergy.y);
@@ -426,6 +426,12 @@ public class Asteroids implements GameLogic{
                     crash.moveTo(ship.x,ship.y);
                     Player.health -= 10;
                 }
+                if(plasmaball.collidedWith(asteroid,"circle")){
+                    asteroid.visible = false;
+                    plasmaball.visible = false;
+                    explosion.visible = true;
+                    explosion.moveTo(asteroid.x,asteroid.y);
+                }
                 for(Animation energy:energies){
                     if(asteroid.collidedWith(energy,"circle")){
                         energy.visible = false;
@@ -433,8 +439,24 @@ public class Asteroids implements GameLogic{
                         explosion.moveTo(asteroid.x,asteroid.y);
                     }
                 }
+                if(plasmaball.collidedWith(asteroid,"circle")){
+                    plasmaball.visible = false;
+                    explosion.visible = true;
+                    explosion.moveTo(asteroid.x,asteroid.y);
+                }
             }  
-            processEnergies();
+            for(Animation energy:energies){
+                energy.draw();
+                if(ship.collidedWith(energy,"circle")){
+                    energy.visible = false;
+                    Player.ammo += 2;
+                }
+                if(!energy.visible){
+                    energy.x = Game.rnd(energy.width,Game.width-energy.width);
+                    energy.y = Game.rnd(energy.height,Game.height-energy.height);
+                    energy.visible = true;
+                }
+            }
         }
         if(plasmaball.collidedWith(boss,"circle")){
             Player.asteroidsAvaible--;
