@@ -3,9 +3,9 @@ import java.util.ArrayList;
 
 public class Asteroids implements GameLogic{
     Sprite bk,ship, boss;
-    Animation plasmaball, explosion, crash, bossEnergy, shield;
-    Shape healthBar, ammoBar, asteroidBar;
-    Font gameFont, basicFont, barFont, winFont, loseFont;
+    Animation plasmaball, explosion, crash, bossEnergy, shield, purchaseHealth, purchaseAmmo;
+    Shape healthBar, ammoBar, asteroidBar, timeBar;
+    Font gameFont, basicFont, barFont, winFont, loseFont, titleFont, selectionFont;
     int introCount = 0;
     
     ArrayList<Animation> asteroids;
@@ -15,8 +15,14 @@ public class Asteroids implements GameLogic{
         public static int health;
         public static int ammo;
         public static int shield = 100;
-        public static int bonusAmmo = 5;
-        public static int bonusHeath = 10;
+        public static int bonusAmmo = 2;
+        public static int bonusHeath = 2;
+        public static float bonusTime = 100;
+        public static int points = 0;
+        public static int purchaseWindow = 200;
+        public static String nextLevel;
+        public static String bonusSelection = "Health";
+        public static boolean selectionMade = false;
     }
 
     public Asteroids() {
@@ -24,11 +30,13 @@ public class Asteroids implements GameLogic{
         Game.setBackground(bk);
 
         healthBar = new Shape("rectangle",100,10,Color.GREEN);
-        healthBar.moveTo(120,20);
+        healthBar.moveTo(120,50);
         ammoBar = new Shape("rectangle",100,10,Color.ORANGE);
-        ammoBar.moveTo(120, 50);
+        ammoBar.moveTo(120, 80);
         asteroidBar = new Shape("rectangle",100,10,Color.CYAN);
-        asteroidBar.moveTo(120, 80);
+        asteroidBar.moveTo(120, 110);
+        timeBar = new Shape("rectangle",100,10,Color.MAGENTA);
+        timeBar.moveTo(120, 20);
 
         plasmaball = new Animation("images/plasmaball1.png",11,352/11,32,1);
         plasmaball.visible = false;
@@ -38,13 +46,21 @@ public class Asteroids implements GameLogic{
         crash.visible = false;
         ship = new Sprite("images/hero.gif");
         shield = new Animation("images/aura.png",16,512/4,512/4,1);
+        purchaseHealth = new Animation("images/firstaid.png",40,1285/5,2000/8,1);
+        purchaseHealth.moveTo(690,470);
+        purchaseHealth.resizeBy(-80);
+        purchaseAmmo = new Animation("images/plasmaball3.png",5,60,60,2);
+        purchaseAmmo.moveTo(275,475);
+        purchaseAmmo.resizeBy(5);
 
         boss = new Sprite("images/boss2.png");
         bossEnergy = new Animation("images/nova.png",5, 80, 80,1);
         boss.resizeBy(-75);
 
         gameFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.CYAN);
+        titleFont = new Font("images/battlestar.ttf",70,Color.WHITE,Color.CYAN);
         basicFont = new Font("Arial",40,Color.WHITE,Color.CYAN);
+        selectionFont = new Font("Arial",80,Color.WHITE,Color.CYAN);
         barFont = new Font("Arial",18,Color.BLACK,Color.WHITE);
         winFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.GREEN);
         loseFont = new Font("images/battlestar.ttf",100,Color.WHITE,Color.RED);
@@ -80,6 +96,9 @@ public class Asteroids implements GameLogic{
             case "Final Level":
                 levelFinal();
                 break;
+            case "Bonus Purchase":
+                bonusPurchase();
+                break;
             case "Game Over":
                 gameOver();
                 break;
@@ -105,7 +124,7 @@ public class Asteroids implements GameLogic{
             ship.rotateAngle = 0;
             ship.moveAngle = 0;
             energies = generateEnergies(1,5);
-            asteroids = generateAsteroids(1, 5,2);
+            asteroids = generateAsteroids(1, 6,2);
             Game.state = "Level 1";
         }
     }
@@ -140,6 +159,12 @@ public class Asteroids implements GameLogic{
         asteroidBar.x = (int)(40 + Player.asteroidsAvaible * 5);
         asteroidBar.draw();
         Game.drawText(" " + Player.asteroidsAvaible, 30, asteroidBar.y + 5, barFont);
+        timeBar.width = Player.bonusTime + 20;
+        timeBar.x = (int)(40 + Player.bonusTime);
+        timeBar.draw();
+        Game.drawText(" " + (int)Player.bonusTime, 30, timeBar.y + 5, barFont);
+
+
         if(Player.shield > 0){
             shield.moveTo(ship.x,ship.y);
         }
@@ -154,16 +179,76 @@ public class Asteroids implements GameLogic{
         if(Player.shield > 0){
             Player.shield--;
         }
+        if(Player.bonusTime > 0.1){
+            Player.bonusTime -= 0.05;
+        }
         
         plasmaball.move();
         if(plasmaball.isOffScreen()){
             plasmaball.visible = false;
         }
         explosion.draw(false);
+
         return true;
     }
     public boolean levelCommonProcesses(){
         return levelCommonProcesses(0,0);
+    }
+
+    public void bonusPurchase(){
+        Game.drawBackground();
+        purchaseHealth.draw();
+        purchaseAmmo.draw();
+
+        timeBar.width = Player.bonusTime + 20;
+        timeBar.x = (int)(40 + Player.bonusTime);
+        timeBar.draw();
+        Game.drawText(" " + (int)Player.bonusTime, 30, timeBar.y + 5, barFont);
+        healthBar.width = Player.health + 20;
+        healthBar.x = (int)(40 + Player.health);
+        healthBar.draw();
+        Game.drawText(" " + Player.health, 30, healthBar.y + 5, barFont);
+        ammoBar.width = Player.ammo * 5 + 20 ;
+        ammoBar.x = (int)(40 + Player.ammo * 5);
+        ammoBar.draw();
+        Game.drawText(" " + Player.ammo, 30, ammoBar.y + 5, barFont);
+
+        Game.drawText("Bonus Resources ", 100, 200, titleFont);
+
+        Game.drawText("Ammo", 210, 400, basicFont);
+        Game.drawText("Health", 630, 400, basicFont);
+        Game.drawText("Available Points - " + Player.points, 300, 275, basicFont);
+        Game.drawText("Press [ENTER] to purchase and [C] to continue", 40, Game.height - 100, basicFont);
+
+        if(Keys.pressed[Keys.LEFT]){
+            Player.bonusSelection = "Ammo";
+        }else if(Keys.pressed[Keys.RIGHT]){
+            Player.bonusSelection = "Health";
+        }
+        if(Player.bonusSelection.equals("Ammo")){
+            if(Keys.pressed[Keys.ENTER] && Player.points >= 5 && !Player.selectionMade){
+                Player.ammo += 1;
+                Player.points -= 5;
+                Player.selectionMade = true;
+            }
+            Game.drawText("<    >",180 ,500,selectionFont);
+        }else if(Player.bonusSelection.equals("Health")){
+            if(Keys.pressed[Keys.ENTER] && Player.points >= 5 && !Player.selectionMade){
+                Player.health += 2;
+                Player.points -= 5;
+                Player.selectionMade = true;
+            }
+            Game.drawText("<    >",600 ,500,selectionFont);
+        }
+        if(!Keys.pressed[Keys.ENTER]){
+            Player.selectionMade = false;
+        }
+
+        if(Keys.pressed[Keys.C]){
+            Player.bonusTime = 100;
+            Game.state = Player.nextLevel;
+        }
+        
     }
     public void level1(){
         if(levelCommonProcesses() == false){
@@ -174,8 +259,11 @@ public class Asteroids implements GameLogic{
             asteroids = generateAsteroids(2, 10,2);
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.points += Player.bonusTime;
             Player.shield = 100;
-            Game.state = "Level 2";
+            Player.nextLevel = "Level 2";
+            
+            Game.state = "Bonus Purchase";
         }else{
             processAsteroids(asteroids);
             processEnergies();
@@ -192,8 +280,11 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 16;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.points += Player.bonusTime;
             Player.shield = 100;
-            Game.state = "Level 3";
+            Player.nextLevel = "Level 3";
+            
+            Game.state = "Bonus Purchase";
         }else{
             processAsteroids(asteroids);
             processEnergies();
@@ -209,8 +300,11 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 16;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.points += Player.bonusTime;
             Player.shield = 100;
-            Game.state = "Level 4";
+            Player.nextLevel = "Level 4";
+            
+            Game.state = "Bonus Purchase";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
             for(Animation asteroid: asteroids){
@@ -277,8 +371,11 @@ public class Asteroids implements GameLogic{
             }
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.points += Player.bonusTime;
             Player.shield = 100;
-            Game.state = "Level 5";
+            Player.nextLevel = "Level 5";
+            
+            Game.state = "Bonus Purchase";
         }else{
             ArrayList<Animation> newAsteroids = new ArrayList<>();
             for(Animation asteroid: asteroids){
@@ -346,8 +443,11 @@ public class Asteroids implements GameLogic{
             Player.asteroidsAvaible = 20;
             Player.health += Player.bonusHeath;
             Player.ammo += Player.bonusAmmo;
+            Player.points += Player.bonusTime;
             Player.shield = 100;
-            Game.state = "Final Level";
+            Player.nextLevel = "Final Level";
+            
+            Game.state = "Bonus Purchase";
         }else{
             double theta = Math.PI / 360;
             for(Animation asteroid: asteroids){
