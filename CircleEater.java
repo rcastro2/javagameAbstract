@@ -9,7 +9,7 @@ public class CircleEater implements GameLogic{
     Coordinate you = new Coordinate(Game.width/2, Game.height/2);
 
     public CircleEater() {
-        bk = new Animation("images/field_5.png",5,1000,1000,1);
+        bk = new Sprite("images/grid.png");
         s = new Shape("ellipse",30,30,Color.CYAN);
         Game.setBackground(bk);
 
