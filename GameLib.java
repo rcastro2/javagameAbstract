@@ -396,7 +396,7 @@ class Sprite extends GameObject{
             transform.translate(this.x, this.y);
             
             // Rotate around the center of the image (width / 2, height / 2)
-            transform.rotate(this.rotateAngle + Math.PI / 2, 0, 0);
+            transform.rotate(this.rotateAngle, 0, 0);
             
             // Apply the scaling
             transform.scale(this.scale, this.scale);
