@@ -10,7 +10,8 @@ public class Asteroids implements GameLogic{
     
     ArrayList<Animation> asteroids;
     ArrayList<Animation> energies;
-    class Player{
+    //static modifier for Java 8 compliance
+    static class Player{
         public static int asteroidsAvaible;
         public static int health;
         public static int ammo;
