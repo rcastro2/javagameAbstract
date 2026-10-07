@@ -417,6 +417,8 @@ class Sprite extends GameObject{
     public void resizeTo(int w, int h){
         Image image = this.original.getScaledInstance(w, h,  java.awt.Image.SCALE_SMOOTH);
         this.i = new ImageIcon(image).getImage();
+        this.width = this.i.getWidth(null);
+        this.height = this.i.getHeight(null);
     }
     public void resizeBy(double by){
         double pct = 1 + by / 100;
@@ -426,83 +428,91 @@ class Sprite extends GameObject{
     }
 }
 
-class Animation extends Sprite{
+class Animation extends Sprite {
     public int current_frame, frames, frame_per_rows, frame_per_cols;
-    private double frame_width,frame_height, frame_rate, frame_count;
+    private double frame_width, frame_height, frame_rate, frame_count;
     public boolean loop;
 
     public Animation(String fn, int frames, int frame_width, int frame_height, double frame_rate) {
         super(fn);
         this.frames = frames;
-        this.frame_width = frame_width;
-        this.frame_height = frame_height;
+        this.frame_width = frame_width;      // Source frame width in sheet
+        this.frame_height = frame_height;    // Source frame height in sheet
         this.frame_per_cols = i.getWidth(null) / frame_width;
         this.frame_per_rows = i.getHeight(null) / frame_height;
         this.frame_rate = frame_rate;
         this.frame_count = 0;
         this.current_frame = 0;
-        this.width = frame_width;
-        this.height = frame_height;
-    }
-    public void resizeBy(double by){
-        this.scale += by / 100;
+        this.width = frame_width;            // Target rendering width
+        this.height = frame_height;          // Target rendering height
     }
 
-    public void draw(boolean loop){      
-        if(this.visible){  
+    // Override resizeTo so it changes target rendering size without altering sprite sheet image 'i'
+    @Override
+    public void resizeTo(int w, int h) {
+        this.width = w;
+        this.height = h;
+        this.scale = 1.0; 
+    }
+
+    public void resizeTo(double w, double h) {
+        this.width = w;
+        this.height = h;
+        this.scale = 1.0;
+    }
+
+    @Override
+    public void resizeBy(double by) {
+        double pct = 1 + by / 100;
+        this.width *= pct;
+        this.height *= pct;
+    }
+    public void draw(boolean loop) {      
+        if (this.visible) {  
             int sourceStartX = (this.current_frame % this.frame_per_cols) * (int)this.frame_width;
             int sourceStartY = (this.current_frame / this.frame_per_cols) * (int)this.frame_height;             
-            // Save the current transformation
+
             Graphics2D g2d = (Graphics2D) Game.canvas;
             AffineTransform oldTransform = g2d.getTransform();
 
-            // Set the rotation and scaling transformation
             AffineTransform transform = new AffineTransform();
 
-            // Translate to the object's position (center of the object)
             transform.translate(this.x, this.y);
-
-            // Rotate around the center of the image (width / 2, height / 2)
             transform.rotate(this.rotateAngle, 0, 0);
 
-            // Apply the scaling
-            transform.scale(this.scale, this.scale);
-
-            // Set the transformation to the graphics context
             g2d.setTransform(transform);
 
-            // Draw the correct frame from the sprite sheet
+            // Destination uses this.width & this.height; Source uses frame_width & frame_height
             g2d.drawImage(i,
-                (int) (-this.frame_width / 2), (int) (-this.frame_height / 2), 
-                (int) (this.frame_width / 2), (int) (this.frame_height / 2), 
+                (int) (-this.width / 2), (int) (-this.height / 2), 
+                (int) (this.width / 2), (int) (this.height / 2), 
                 sourceStartX, sourceStartY, 
                 sourceStartX + (int) this.frame_width, 
                 sourceStartY + (int) this.frame_height, 
                 null);
                 
-            // Restore the previous transformation
             g2d.setTransform(oldTransform);   
+            
             this.frame_count += this.frame_rate;
-            if(this.frame_count > 1){
+            if (this.frame_count > 1) {
                 this.frame_count = 0;
                 this.current_frame++;
             }
             this.current_frame = this.current_frame % this.frames;
             
-            if(!loop && this.current_frame == this.frame_count){
+            if (!loop && this.current_frame == this.frame_count) {
                 this.visible = false;
                 this.current_frame = 0;
             }
-            
         }
-
         updateRect();
         drawBoundaries();     
     }
-    public void draw(){
+    public void draw() {
         this.draw(true);
     }
 }
+
 
 class Shape extends GameObject{
     public String shape;

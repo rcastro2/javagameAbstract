@@ -10,12 +10,14 @@ public class FlappyBird implements GameLogic{
     String state;
     public FlappyBird() {
         bk = new Sprite("images/day.png",(int)(Game.width/2),(int)(Game.height/2));
+        bk.resizeTo(Game.width, Game.height);
         Game.setBackground(bk);
         pipeTop = new Sprite("images/pipe_top.png");
         pipeBottom = new Sprite("images/pipe_bot.png");
 
         bar = new Animation("images/bar.png",3,700,110,0.5);
-        bar.y = 450; 
+        bar.y = Game.height - 80; 
+        bar.resizeTo(Game.width, (int)bar.height);
         bird = new Animation("images/bird.png",3,44,34,0.5);
         bird.x = 300;
 
